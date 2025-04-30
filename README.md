@@ -50,16 +50,10 @@ Bu proje, Kocaeli Üniversitesi'nde akademik personel başvuru süreçlerini dij
 
 ## Proje Raporu
 
-Tam proje raporu `docs/Grup2_rapor.docx` dosyası olarak `docs/` dizininde bulunmaktadır. Raporu projeye eklemek için:
-
-1. `Grup2_rapor.docx` dosyasını projenizin `docs/` klasörüne taşıyın.
-2. Aşağıdaki satırı `README.md` dosyanıza ekleyin:
-   ```markdown
-   ## Proje Raporu
-   Tam rapor için [Grup2_rapor.docx](docs/Grup2_rapor.docx) dosyasına göz atabilirsiniz.
-   ```
+[Grup2_rapor.docx](https://github.com/user-attachments/files/19978678/Grup2_rapor.docx)
 
 ## Lisans
 
 MIT Lisansı
+
 
