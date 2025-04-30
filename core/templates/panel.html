@@ -1,0 +1,84 @@
+<!-- Hamburger Menü Butonu -->
+<div class="menu-toggle" onclick="toggleMenu()">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+</div>
+
+<!-- Yan Menü -->
+<div class="side-menu" id="sideMenu">
+    <a href="javascript:void(0)" class="closebtn" onclick="toggleMenu()">×</a>
+    <a href="kisisel_bilgiler.html">👤 Kişisel Bilgiler</a>
+    <a href="basvurularim.html">📝 Başvurularım</a>
+    <a href="ilanlar.html">📋 İlanlar</a>
+</div>
+
+<style>
+    /* Sade 3 çizgilik hamburger menü */
+    .menu-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        cursor: pointer;
+        z-index: 1001;
+        width: 30px;
+        height: 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .menu-toggle .bar {
+        height: 4px;
+        width: 100%;
+        background-color: black; /* Siyah çizgiler */
+        border-radius: 2px;
+    }
+
+    /* Yan Menü */
+    .side-menu {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #28a745; /* Menü rengi */
+        overflow-x: hidden;
+        transition: 0.3s;
+        padding-top: 60px;
+        z-index: 1000;
+    }
+
+    .side-menu.show {
+        width: 250px;
+    }
+
+    .side-menu a {
+        padding: 12px 20px;
+        text-decoration: none;
+        font-size: 18px;
+        color: white;
+        display: block;
+        transition: 0.2s;
+    }
+
+    .side-menu a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .closebtn {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 30px;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById('sideMenu');
+        menu.classList.toggle('show');
+    }
+</script>

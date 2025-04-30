@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Akademik İlanlar</title>
+    <link rel="stylesheet" href="{% static 'css/yazlab_aday/styles.css' %}" />
+    <style>
+        /* Hamburger Menü CSS */
+        .menu-toggle {
+            position: fixed; top:20px; left:20px;
+            cursor: pointer; z-index:1001;
+            width:30px; height:22px;
+            display:flex; flex-direction:column;
+            justify-content:space-between;
+        }
+        .menu-toggle .bar {
+            height:4px; width:100%; background-color:black;
+            border-radius:2px;
+        }
+        .side-menu {
+            height:100%; width:0;
+            position:fixed; top:0; left:0;
+            background-color:#28a745;
+            overflow-x:hidden; transition:0.3s;
+            padding-top:60px; z-index:1000;
+        }
+        .side-menu.show { width:250px; }
+        .side-menu a {
+            padding:12px 20px; color:white;
+            text-decoration:none; font-size:18px;
+            display:block; transition:0.2s;
+        }
+        .side-menu a:hover { background-color:rgba(255,255,255,0.1); }
+        .closebtn {
+            position:absolute; top:10px; right:20px;
+            font-size:30px; color:white; text-decoration:none;
+        }
+
+        /* Modal CSS */
+        .modal {
+            display:none; position:fixed; z-index:2000;
+            top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.5);
+            align-items:center; justify-content:center;
+        }
+        .modal.show { display:flex; }
+        .modal-content {
+            background:#fff; padding:1.5rem;
+            border-radius:.5rem; width:90%; max-width:800px;
+            position:relative;
+        }
+        .modal-close {
+            position:absolute; top:.5rem; right:.75rem;
+            font-size:1.5rem; cursor:pointer;
+        }
+        .modal h2 { margin-top:0; }
+        .modal .btn-apply {
+            display:block; width:100%; margin-top:1rem;
+            padding:.75rem; background:#28a745;
+            color:#fff; text-align:center;
+            text-decoration:none; border-radius:.25rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-toggle" onclick="toggleMenu()">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+    <div class="side-menu" id="sideMenu">
+        <a href="{% url 'kisisel_bilgiler' %}">👤 Kişisel Bilgiler</a>
+        <a href="{% url 'ilanlar' %}">📋 İlanlar</a>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo" />
+            <h1>Kocaeli Üniversitesi Akademik Personel Başvuru Sistemi</h1>
+        </header>
+
+        <div class="filter-buttons">
+            <button onclick="filterJobs('doçent')">Doçent</button>
+            <button onclick="filterJobs('profesör')">Profesör</button>
+            <button onclick="filterJobs('dr. öğretim üyesi')">Dr. Öğr. Üyesi</button>
+            <button onclick="filterJobs('all')">Tüm İlanlar</button>
+        </div>
+
+        <div class="card-columns" id="job-list">
+            {% for ilan in ilanlar %}
+                <div class="card {{ ilan.pozisyon|lower }}">
+                    <div class="card-header">
+                        {{ ilan.pozisyon }} – {{ ilan.bolum }}
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {{ ilan.aciklama|linebreaks }}<br><br>
+                            Başlangıç: {{ ilan.basl_tarih|date:"d.m.Y" }}<br>
+                            Bitiş: {{ ilan.bitis_tarih|date:"d.m.Y" }}<br>
+                            Başvuru Sayısı: {{ ilan.basvuru_sayisi|default:"Henüz başvuru yok" }}
+                        </p>
+                        <button
+                            type="button"
+                            class="btn-apply open-modal-btn"
+                            data-pdf-url="{% url 'ilan-bilgilendirme' ilanID=ilan.pk %}"
+                            data-ilan-id="{{ ilan.pk }}"
+                        >
+                            Başvur
+                        </button>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Şu anda aktif ilan bulunmamaktadır.</p>
+            {% endfor %}
+        </div>
+
+        <div id="apply-modal" class="modal">
+            <div class="modal-content">
+                <span id="modal-close" class="modal-close">&times;</span>
+                <h2 id="modal-title">Başvuru Bilgilendirme</h2>
+                <div id="modal-body"></div>
+                <a href="#" id="modal-apply-link" class="btn-apply">Başvur</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Kocaeli Üniversitesi. Tüm Hakları Saklıdır.</p>
+    </footer>
+    <script>
+        function toggleMenu() {
+            document.getElementById('sideMenu').classList.toggle('show');
+        }
+
+        function filterJobs(type) {
+            document.querySelectorAll('.card').forEach(card => {
+                card.style.display =
+                    (type === 'all' || card.classList.contains(type.toLowerCase()))
+                        ? 'block' : 'none';
+            });
+        }
+
+        document.querySelectorAll('.open-modal-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const ilanId = btn.dataset.ilanId;
+                const basvuruFormUrl = `/basvuru/create/${ilanId}/`;
+
+                // Modal içeriğini ayarla (PDF indirme linki vb.)
+                const pdfUrl = btn.dataset.pdfUrl;
+                document.getElementById('modal-body').innerHTML = `
+                      <p><strong>Lütfen başvuru rehberini inceleyin:</strong></p>
+                      <p><a href="/ilan/${ilanId}/indir/" target="_blank" download="ilan_${ilanId}_bilgilendirme.pdf">
+                       Bilgilendirme PDF’i İndir
+                      </a></p>
+`;
+
+
+                // "Başvur" butonunun linkini ayarla
+                document.getElementById('modal-apply-link').setAttribute('href', basvuruFormUrl);
+
+                document.getElementById('apply-modal').classList.add('show');
+            });
+        });
+
+        // Modal kapatma
+        document.getElementById('modal-close').addEventListener('click', () => {
+            document.getElementById('apply-modal').classList.remove('show');
+        });
+        window.addEventListener('click', e => {
+            if (e.target.id === 'apply-modal') {
+                e.target.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

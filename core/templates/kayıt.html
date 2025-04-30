@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol</title>
+    <link rel="stylesheet" href="{% static 'css/yazlab_aday/styles.css' %}" />
+</head>
+<body>
+    <div class="main-container">
+        <header class="header">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo" />
+            <h1>Kocaeli Üniversitesi Akademik Personel Başvuru Sistemi</h1>
+        </header>
+
+        <div id="login-form-container">
+            <div class="login-form">
+                <h2>Kayıt Ol</h2>
+                <form method="post" action="{% url 'kayit' %}">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="adSoyad">Ad Soyad</label>
+                        <input
+                            type="text"
+                            id="adSoyad"
+                            name="adSoyad"
+                            placeholder="Adınızı ve Soyadınızı Girin"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tcNo">TC Kimlik No</label>
+                        <input
+                            type="text"
+                            id="tcNo"
+                            name="tcNo"
+                            placeholder="TC Kimlik Numaranızı Girin"
+                            required
+                            maxlength="11"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="unvan">Akademik Ünvan</label>
+                        <select id="unvan" name="unvan" required>
+                            <option value="">Seçiniz</option>
+                            <option value="Profesör">Profesör</option>
+                            <option value="Doçent">Doçent</option>
+                            <option value="Dr. Öğretim Üyesi">Dr. Öğretim Üyesi</option>
+                            <option value="Arş. Gör.">Araştırma Görevlisi</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Şifre</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Şifrenizi Girin"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dogumYili">Doğum Tarihi</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" name="gun" placeholder="Gün" min="1" max="31" required />
+                            <input type="number" name="ay" placeholder="Ay" min="1" max="12" required />
+                            <input type="number" name="yil" placeholder="Yıl" min="1900" max="2025" required />
+                        </div>
+                    </div>
+                    
+                    
+
+                    <button type="submit" class="btn">Kayıt Ol</button>
+                </form>
+
+                {% if messages %}
+                    <ul class="messages">
+                        {% for m in messages %}
+                            <li class="{{ m.tags }}">{{ m }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Kocaeli Üniversitesi. Tüm Hakları Saklıdır.</p>
+    </footer>
+
+    <script src="{% static 'js/yazlab_aday/script.js' %}?v=2"></script>
+</body>
+</html>

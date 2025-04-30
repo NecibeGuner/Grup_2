@@ -1,0 +1,1456 @@
+{% if messages %}
+  <ul class="alert alert-danger">
+    {% for msg in messages %}
+      <li>{{ msg }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>Genel Puanlama Bilgileri (Tam Form)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* Temel sayfa stili */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        /* Tablo stili */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #000; /* Koyu kenarlık */
+        }
+        th, td {
+            padding: 8px;
+            vertical-align: top;
+        }
+        th {
+            text-align: center;
+            background-color: #f2f2f2; /* Hafif gri arka plan */
+        }
+        /* Geniş input alanları */
+        input[type="text"],
+        input[type="date"],
+        input[type="number"] {
+            width: 95%;
+            box-sizing: border-box;
+        }
+        /* Checkbox düzeni */
+        label {
+            margin-right: 10px;
+        }
+        /* PDF'e dönüştürme butonu */
+        .convert-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Genel Puanlama Bilgileri</h1>
+    <form id="puanlamaForm"
+      method="post"
+      enctype="multipart/form-data"
+      action="{% url 'basvuru_create' %}">
+      {% csrf_token %}
+        <!-- 1) GENEL BİLGİLER -->
+        <table>
+          <tr>
+            <th colspan="4">GENEL PUANLAMA BİLGİLERİ</th>
+          </tr>
+          <tr>
+            <td><strong>Adı Soyadı (Unvan):</strong></td>
+            <td>
+              <input type="text"
+                     name="ad_soyad"
+                     value="{% if kis_obj %}{{ kis_obj.ad_soyad }}{% endif %}"
+                     placeholder="Adınız Soyadınız"
+                     style="width:95%; box-sizing:border-box;" />
+            </td>
+            <td><strong>Başvuru Tarihi:</strong></td>
+            <td>
+              <input type="date"
+                     name="basvuru_tarihi"
+                     value="{% now 'Y-m-d' %}"
+                     style="width:95%; box-sizing:border-box;" />
+            </td>
+          </tr>
+          <tr>
+            <td><strong>T.C. Kimlik No:</strong></td>
+            <td>
+              <input type="text"
+                     name="tc_kimlik_no"
+                     value="{% if kis_obj %}{{ kis_obj.tc_kimlik_no }}{% endif %}"
+                     placeholder="11 haneli T.C. Kimlik No"
+                     style="width:95%; box-sizing:border-box;" />
+            </td>
+            <td><strong>Doğum Tarihi:</strong></td>
+            <td>
+              <input type="date"
+                     name="dogum_tarihi"
+                     value="{% if kis_obj %}{{ kis_obj.dogum_tarihi|date:'Y-m-d' }}{% endif %}"
+                     style="width:95%; box-sizing:border-box;" />
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Email:</strong></td>
+            <td>
+              <input type="email"
+                     name="email"
+                     value="{% if kis_obj %}{{ kis_obj.email }}{% endif %}"
+                     placeholder="you@example.com"
+                     style="width:95%; box-sizing:border-box;" />
+            </td>
+            <td><strong>Adres:</strong></td>
+            <td>
+              <textarea name="adres"
+                        rows="2"
+                        placeholder="Adresinizi giriniz…"
+                        style="width:95%; box-sizing:border-box;">{% if kis_obj %}{{ kis_obj.adres }}{% endif %}</textarea>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Akademik Unvan / Kadro:</strong></td>
+            <td colspan="3">
+              <input type="text"
+                     name="akademik_unvan"
+                     value="{% if kis_obj %}{{ kis_obj.akademik_unvan }}{% endif %}"
+                     placeholder="Profesör / Doçent / …"
+                     style="width:95%; box-sizing:border-box;" />
+            </td>
+          </tr>
+          <tr>
+            <td><strong>İmza:</strong></td>
+            <td>
+              <input type="text"
+                     name="imza"
+                     placeholder="İmza veya Onay"
+                     style="width:95%; box-sizing:border-box;" />
+            </td>
+            <td colspan="2"></td>
+          </tr>
+        
+          <tr>
+            <th colspan="4">Puanlanan Faaliyet Dönemi</th>
+          </tr>
+          <tr>
+            <td colspan="4">
+              <label><input type="checkbox" name="profesor" /> Profesör (Doçent sonrası faaliyetler)</label><br>
+              <label><input type="checkbox" name="docent" /> Doçent (Doktora/Sanatta yeterlik sonrası)</label><br>
+              <label><input type="checkbox" name="drOgrUyesi" /> Dr. Öğretim Üyesi (Yeniden atama sonrası)</label>
+            </td>
+          </tr>
+        </table>
+        
+
+      <!-- 2) A. MAKALELER -->
+      <tr>
+        <th colspan="4">A.MAKALELER</th>
+    </tr>
+
+      <table id="makale-tablosu">
+          <tr>
+            <th style="width: 30%;">Makale Türü</th>
+            <th style="width: 40%;">Yazarlar, Makale Adı, Dergi, Cilt, Sayfa, Yıl</th>
+            <th style="width: 20%;">PDF Dosyası</th>
+            <th style="width: 10%;"></th>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>
+              1) SCI-E, SSCI veya AHCI kapsamındaki dergilerde yayımlanmış makale (Q1)
+              <input type="hidden" name="makale_turu[]" value="Q1">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>2) SCI-E, SSCI veya AHCI kapsamındaki dergilerde yayımlanmış makale (Q2)
+              <input type="hidden" name="makale_turu[]" value="Q2">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>3) SCI-E, SSCI veya AHCI kapsamındaki dergilerde yayımlanmış makale (Q3)
+              <input type="hidden" name="makale_turu[]" value="Q3">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>4) SCI-E, SSCI veya AHCI kapsamındaki dergilerde yayımlanmış makale (Q4)
+              <input type="hidden" name="makale_turu[]" value="Q4">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>5) ESCI taranan dergilerde yayımlanmış makale
+              <input type="hidden" name="makale_turu[]" value="ESCI">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>6) ULAKBİM TR Dizin taranmış dergilerde yayımlanmış makale
+              <input type="hidden" name="makale_turu[]" value="ULAKBIM_TR">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>7) Ulusal hakemli dergilerde yayımlanmış makale
+              <input type="hidden" name="makale_turu[]" value="ULUSAL">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>8) ULAKBİM TR Dizin tarafından taranan ulusal hakemli dergilerde yayımlanmış makale
+              <input type="hidden" name="makale_turu[]" value="ULAKBIM_TR_ULUSAL">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        
+          <tr class="makale-satir">
+            <td>9) 8. madde dışındaki ulusal hakemli dergilerde yayımlanmış makale
+              <input type="hidden" name="makale_turu[]" value="ULUSAL_8_DISI">
+            </td>
+            <td><textarea name="yazarlar_dergi_bilgi[]" rows="3" style="width: 100%;"></textarea></td>
+            <td><input type="file" name="pdf_yolu[]" accept=".pdf"></td>
+            <td><button type="button" onclick="yeniMakaleEkle(this)">Yeni Makale Ekle</button></td>
+          </tr>
+        </table>
+        
+
+        <script>
+        function yeniMakaleEkle(button) {
+          // Var olan satırı klonla
+          const satir = button.closest("tr");
+          const clone = satir.cloneNode(true);
+        
+          // İçindeki input/textarea/select’leri temizle
+          clone.querySelectorAll("select, textarea, input[type=file]").forEach(el => {
+            if (el.tagName === "SELECT") el.selectedIndex = 0;
+            else if (el.tagName === "TEXTAREA") el.value = "";
+            else if (el.type === "file") el.value = null;
+          });
+        
+          // Butonu "Vazgeç" yap
+          const btn = clone.querySelector("button");
+          btn.textContent = "✕";
+          btn.className = "btn btn-sm btn-outline-danger";
+          btn.onclick = () => clone.remove();
+        
+          // Klonu ekle
+          satir.parentNode.insertBefore(clone, satir.nextSibling);
+        }
+        </script>
+
+<!-- ✅ JavaScript -->
+<script>
+function yeniMakaleEkle(button) {
+    const satir = button.closest("tr");
+    const yeniSatir = satir.cloneNode(true);
+
+    // Temizle
+    yeniSatir.querySelectorAll("input, textarea").forEach(el => el.value = "");
+
+    // ➕ ibaresi ile farklılık belirt
+    const orijinalMetin = satir.cells[0].innerText;
+    yeniSatir.cells[0].innerText = "➕ Yeni " + orijinalMetin;
+
+    // Butonu "Vazgeç" yap
+    const buton = yeniSatir.querySelector("button");
+    buton.textContent = "Vazgeç";
+    buton.style.backgroundColor = "#dc3545";
+    buton.style.color = "white";
+    buton.onclick = function () {
+        yeniSatir.remove();
+    };
+
+    // Satırı ekle
+    satir.parentNode.insertBefore(yeniSatir, satir.nextSibling);
+}
+</script>
+<!-- 2) B. BİLİMSEL TOPLANTI FAALİYETLERİ -->
+<table id="bilimsel-toplanti-tablosu">
+  <thead>
+    <tr>
+      <th colspan="4">B. BİLİMSEL TOPLANTI FAALİYETLERİ</th>
+    </tr>
+    <tr>
+      <th style="width:30%;"></th>
+      <th style="width:40%;">Yazar/Yazarlar, Bildiri Adı, Konferansın Adı, Yapıldığı Yer, Sayfa Sayıları ve Tarih</th>
+      <th style="width:15%;">Döküman Ekle</th>
+      <th style="width:15%;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- İlk satırlar JS tarafından buraya eklenecek -->
+  </tbody>
+</table>
+
+<script>
+  const sorular = [
+    "1) Uluslararası bilimsel toplantılarda sözlü olarak sunulan, tam metni matbu veya elektronik olarak bildiri kitapçığında yayımlanmış çalışmalar",
+    "2) Uluslararası bilimsel toplantılarda sözlü olarak sunulan, özet metni matbu veya elektronik olarak bildiri kitapçığında yayımlanmış çalışmalar",
+    "3) Uluslararası bilimsel toplantılarda poster olarak sunulan çalışmalar",
+    "4) Ulusal bilimsel toplantılarda sözlü olarak sunulan tam metni matbu veya elektronik olarak bildiri kitapçığında yayımlanmış çalışmalar",
+    "5) Ulusal bilimsel toplantılarda sözlü olarak sunulan, özet metni matbu veya elektronik olarak bildiri kitapçığında yayımlanmış çalışmalar",
+    "6) Ulusal bilimsel toplantılarda poster olarak sunulan çalışmalar",
+    "7) Uluslararası bir kongre, konferans veya sempozyumda organizasyon veya yürütme komitesinde düzenleme kurulu üyeliği veya bilim kurulu üyeliği yapmak",
+    "8) Ulusal bir kongre, konferans veya sempozyumda organizasyon veya yürütme komitesinde düzenleme kurulu üyeliği veya bilim kurulu üyeliği yapmak",
+    "9) Uluslararası konferanslarda, bilimsel toplantı, seminerlerde davetli konuşmacı olarak yer almak",
+    "10) Ulusal konferanslarda, bilimsel toplantı, seminerlerde davetli konuşmacı olarak yer almak",
+    "11) Uluslararası veya ulusal çeşitli kurumlarla işbirliği içinde atölye, çalıştay, yaz okulu organize ederek gerçekleştirmek",
+    "12) Uluslararası veya ulusal çeşitli kurumlarla işbirliği içinde atölye, çalıştay, panel, seminer, yaz okulunda konuşmacı veya panelist olarak görev almak"
+  ];
+
+  const tbody = document.querySelector("#bilimsel-toplanti-tablosu tbody");
+
+  // Başlangıç satırlarını oluştur
+  sorular.forEach((soru, index) => {
+    const enumKodu = "B" + (index + 1);
+    const tr = document.createElement("tr");
+    tr.classList.add("toplanti-satir");
+    tr.innerHTML = `
+      <td>
+        ${soru}
+        <input type="hidden" name="toplanti_turu" value="${enumKodu}">
+      </td>
+      <td>
+        <textarea name="toplanti_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <input type="file" name="toplanti_belge" accept=".pdf">
+      </td>
+      <td>
+        <button type="button" onclick="yeniToplantiEkle(this)">Yeni Çalışma Ekle</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Dinamik satır ekleme fonksiyonu
+  function yeniToplantiEkle(button) {
+    const eskiSatir = button.closest("tr");
+    const soruMetni = eskiSatir.cells[0].childNodes[0].textContent.trim();
+    const enumKodu  = eskiSatir.querySelector('input[name="toplanti_turu"]').value;
+
+    const yeniSatir = document.createElement("tr");
+    yeniSatir.classList.add("toplanti-satir");
+    yeniSatir.innerHTML = `
+      <td style="font-weight: normal;">
+        ➤ ${soruMetni}
+        <input type="hidden" name="toplanti_turu" value="${enumKodu}">
+      </td>
+      <td>
+        <textarea name="toplanti_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <input type="file" name="toplanti_belge" accept=".pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>
+    `;
+    eskiSatir.parentNode.insertBefore(yeniSatir, eskiSatir.nextSibling);
+  }
+</script>
+
+<!-- 1) C. KİTAPLAR -->
+<table id="kitaplar-tablosu">
+  <thead>
+    <tr>
+      <th colspan="4">
+        C. KİTAPLAR<br>
+        (Yabancı dildeki kitapların puanları 1.5 ile çarpıldıktan sonra hesaplama kullanılır)
+      </th>
+    </tr>
+    <tr>
+      <th style="width:30%;"></th>
+      <th style="width:40%;">Yazar/Yazarlar, Kitap Adı, Yayınevi, Baskı sayısı, Yayımlandığı Yer, Yıl</th>
+      <th style="width:15%;">Kitap Belgeleri</th>
+      <th style="width:15%;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- JS ile doldurulacak -->
+  </tbody>
+</table>
+
+<!-- 2) D. ATIFLAR -->
+<table id="atiflar-tablosu">
+  <thead>
+    <tr>
+      <th colspan="4">
+        D. ATIFLAR<br>
+        (Atıf yapan eserlerin belgelenmesi kaydıyla, bu yönetmeliğin Temel İlkeler bölümündeki atıflara ilişkin açıklamalar dikkate alınır)
+      </th>
+    </tr>
+    <tr>
+      <th style="width:30%;"></th>
+      <th style="width:40%;">Atıf Yapılan Eserin Bilgisi ve Atıf Sayısı</th>
+      <th style="width:15%;">Belge</th>
+      <th style="width:15%;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- JS ile doldurulacak -->
+  </tbody>
+</table>
+
+<!-- 3) E. EĞİTİM FAALİYETLERİ -->
+<table id="egitim-tablosu">
+  <thead>
+    <tr>
+      <th colspan="3">
+        E. EĞİTİM FAALİYETLERİ
+      </th>
+    </tr>
+    <tr>
+      <th style="width:40%;">Ders Türü</th>
+      <th style="width:50%;">Ders Adı ve Detay</th>
+      <th style="width:10%;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- JS ile doldurulacak -->
+  </tbody>
+</table>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // --- C. KİTAPLAR ---
+    const kitapTbody = document.querySelector("#kitaplar-tablosu tbody");
+    const kitapTurleri = [
+      { kod: "C1", metin: "1) Uluslararası yayınevleri tarafından yayımlanmış özgün kitap" },
+      { kod: "C2", metin: "2) Uluslararası yayınevleri tarafından yayımlanmış özgün kitap editörlüğü, bölüm yazarlığı (Her bir kitap için maksimum 2 bölüm yazarlığı)" },
+      { kod: "C3", metin: "3) Uluslararası yayımlanan ansiklopedi konusu/maddesi (en fazla 3 madde)" },
+      { kod: "C4", metin: "4) Ulusal yayınevleri tarafından yayımlanmış özgün kitap" },
+      { kod: "C5", metin: "5) Ulusal yayınevleri tarafından yayımlanmış özgün kitap editörlüğü, bölüm yazarlığı (Her bir kitap için maksimum 2 bölüm yazarlığı)" },
+      { kod: "C6", metin: "6) Tam kitap çevirisi (Yayınevleri için ilgili ÜAK kriterleri geçerlidir)" },
+      { kod: "C7", metin: "7) Çeviri kitap editörlüğü, kitap bölümü çevirisi (Her bir kitap için maksimum 2 bölüm çevirisi)" },
+      { kod: "C8", metin: "8) Alanında ulusal yayımlanan ansiklopedi konusu/maddesi (en fazla 3 madde)" }
+    ];
+    kitapTurleri.forEach(tur => {
+      const tr = document.createElement("tr");
+      tr.classList.add("kitap-satir");
+      tr.innerHTML = `
+        <td>
+          ${tur.metin}
+          <input type="hidden" name="kitap_turu" value="${tur.kod}">
+        </td>
+        <td>
+          <textarea name="kitap_detaylari" rows="3" style="width:100%;"></textarea>
+        </td>
+        <td>
+          <label>📎 Kapak ve İçindekiler (PDF)</label><br>
+          <input type="file" name="kapak_pdf" accept="application/pdf"><br><br>
+          <label>📎 Yayınevi Tanınırlık Belgesi (PDF)</label><br>
+          <input type="file" name="taninirlik_pdf" accept="application/pdf">
+        </td>
+        <td>
+          <button type="button" onclick="yeniKitapEkle(this, \`${tur.metin}\`, '${tur.kod}')">
+            Yeni Çalışma Ekle
+          </button>
+        </td>`;
+      kitapTbody.appendChild(tr);
+    });
+
+    // --- D. ATIFLAR ---
+    const atifTbody = document.querySelector("#atiflar-tablosu tbody");
+    const atifTurleri = [
+      { kod: "D1", metin: "1) SCI-E, SSCI ve AHCI tarafından taranan dergilerde; Uluslararası yayınevleri tarafından yayımlanmış … her eseri için" },
+      { kod: "D2", metin: "2) E-SCI tarafından taranan dergilerde ve adayın yazar olarak yer almadığı yayınlardan her birinde…" },
+      { kod: "D3", metin: "3) SCI-E, SSCI, AHCI, E-SCI dışındaki uluslararası indeksli dergilerde; Uluslararası yayınevlerinde bölümler için" },
+      { kod: "D4", metin: "4) Ulusal hakemli dergilerde; Ulusal yayınevlerinde yayımlanmış kitaplarda…" },
+      { kod: "D5", metin: "5) Güzel sanat eserlerinin uluslararası kaynaklarda yayımlanması veya gösterilmesi" },
+      { kod: "D6", metin: "6) Güzel sanat eserlerinin ulusal kaynaklarda yayımlanması veya gösterilmesi" }
+    ];
+    atifTurleri.forEach(tur => {
+      const tr = document.createElement("tr");
+      tr.classList.add("atif-satir");
+      tr.innerHTML = `
+        <td>
+          ${tur.metin}
+          <input type="hidden" name="atif_turu" value="${tur.kod}">
+        </td>
+        <td>
+          <textarea name="atif_detay" rows="3" style="width:100%;"></textarea>
+        </td>
+        <td>
+          <label>📎 Atıfı Belgeleyen Kaynağı Yükleyiniz (PDF, Maks: 10MB)</label><br>
+          <input type="file" name="atif_belge" accept="application/pdf">
+        </td>
+        <td>
+          <button type="button" onclick="yeniAtifEkle(this, \`${tur.metin}\`, '${tur.kod}')">
+            Yeni Atıf Ekle
+          </button>
+        </td>`;
+      atifTbody.appendChild(tr);
+    });
+
+    // --- E. EĞİTİM FAALİYETLERİ ---
+    const egitimTbody = document.querySelector("#egitim-tablosu tbody");
+    const egitimTurleri = [
+      { kod: "E1", metin: "1) Ön lisans / lisans dersleri" },
+      { kod: "E2", metin: "2) Ön lisans / lisans dersleri (Yabancı dilde)" },
+      { kod: "E3", metin: "3) Lisansüstü dersleri" },
+      { kod: "E4", metin: "4) Lisansüstü dersleri (Yabancı dilde)" }
+    ];
+    egitimTurleri.forEach(tur => {
+      const tr = document.createElement("tr");
+      tr.classList.add("egitim-satir");
+      tr.innerHTML = `
+        <td>
+          ${tur.metin}
+          <input type="hidden" name="egitim_turu" value="${tur.kod}">
+        </td>
+        <td>
+          <textarea name="egitim_detay" rows="2" style="width:100%;"></textarea>
+        </td>
+        <td>
+          <button type="button" onclick="yeniEgitimEkle(this, \`${tur.metin}\`, '${tur.kod}')">
+            Yeni Ders Ekle
+          </button>
+        </td>`;
+      egitimTbody.appendChild(tr);
+    });
+  });
+
+  // Dinamik satır ekleme fonksiyonları
+  function yeniKitapEkle(btn, metin, kod) {
+    const satir = btn.closest("tr");
+    const tr = document.createElement("tr");
+    tr.classList.add("kitap-satir");
+    tr.innerHTML = `
+      <td style="font-weight: normal;">
+        ➤ ${metin}
+        <input type="hidden" name="kitap_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="kitap_detaylari" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <label>📎 Kapak ve İçindekiler (PDF)</label><br>
+        <input type="file" name="kapak_pdf" accept="application/pdf"><br><br>
+        <label>📎 Yayınevi Tanınırlık Belgesi (PDF)</label><br>
+        <input type="file" name="taninirlik_pdf" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>`;
+    satir.after(tr);
+  }
+
+  function yeniAtifEkle(btn, metin, kod) {
+    const satir = btn.closest("tr");
+    const tr = document.createElement("tr");
+    tr.classList.add("atif-satir");
+    tr.innerHTML = `
+      <td style="font-weight: normal;">
+        ➤ ${metin}
+        <input type="hidden" name="atif_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="atif_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <label>📎 Atıfı Belgeleyen Kaynağı Yükleyiniz (PDF, Maks: 10MB)</label><br>
+        <input type="file" name="atif_belge" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>`;
+    satir.after(tr);
+  }
+
+  function yeniEgitimEkle(btn, metin, kod) {
+    const satir = btn.closest("tr");
+    const tr = document.createElement("tr");
+    tr.classList.add("egitim-satir");
+    tr.innerHTML = `
+      <td style="font-weight: normal;">
+        ➤ ${metin}
+        <input type="hidden" name="egitim_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="egitim_detay" rows="2" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>`;
+    satir.after(tr);
+  }
+</script>
+
+  
+<!-- F. TEZ YÖNETİCİLİĞİ -->
+<table id="tez-tablosu">
+  <thead>
+    <tr>
+      <th colspan="4">
+        F. TEZ YÖNETİCİLİĞİ<br>
+        (Tamamlanmış olması kaydıyla)
+      </th>
+    </tr>
+    <tr>
+      <th style="width:30%;"></th>
+      <th style="width:40%;">Tez Türü</th>
+      <th style="width:15%;">Tez Onay Belgesi</th>
+      <th style="width:15%;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- JS ile doldurulacak -->
+  </tbody>
+</table>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const tezTbody = document.querySelector("#tez-tablosu tbody");
+    const tezTurleri = [
+      { kod: "F1", metin: "1) Doktora/Sanatta Yeterlik veya Tıp/Diş Hekimliğinde Uzmanlık tez yönetimi" },
+      { kod: "F2", metin: "2) Yüksek Lisans Tez Yönetimi" },
+      { kod: "F3", metin: "3) Doktora/Sanatta Yeterlik (Eş Danışman)" },
+      { kod: "F4", metin: "4) Yüksek Lisans/Sanatta Yeterlik Tez Yönetimi (Eş Danışman)" }
+    ];
+
+    tezTurleri.forEach(tur => {
+      const tr = document.createElement("tr");
+      tr.classList.add("tez-satir");
+      tr.innerHTML = `
+        <td>
+          ${tur.metin}
+          <input type="hidden" name="tez_turu" value="${tur.kod}">
+        </td>
+        <td>
+          <textarea name="tez_detaylari" rows="2" style="width:100%;"></textarea>
+        </td>
+        <td>
+          <label>📎 Tez Onay Belgesi (PDF)</label><br>
+          <input type="file" name="tez_belge" accept="application/pdf">
+        </td>
+        <td>
+          <button type="button" onclick="yeniTezEkle(this, \`${tur.metin}\`, '${tur.kod}')">
+            Yeni Çalışma Ekle
+          </button>
+        </td>`;
+      tezTbody.appendChild(tr);
+    });
+  });
+
+  function yeniTezEkle(btn, metin, kod) {
+    const satir = btn.closest("tr");
+    const tr = document.createElement("tr");
+    tr.classList.add("tez-satir");
+    tr.innerHTML = `
+      <td style="font-weight: normal;">
+        ➤ ${metin}
+        <input type="hidden" name="tez_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="tez_detaylari" rows="2" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <label>📎 Tez Onay Belgesi (PDF)</label><br>
+        <input type="file" name="tez_belge" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>`;
+    satir.after(tr);
+  }
+</script>
+
+
+<!-- G) PATENTLER -->
+<table id="patentler-tablosu">
+  <thead>
+    <tr>
+      <th colspan="4">G. PATENTLER</th>
+    </tr>
+    <tr>
+      <th style="width:30%;"></th>
+      <th style="width:40%;">Patent Adı, Yılı</th>
+      <th style="width:15%;">Patent Belgesi</th>
+      <th style="width:15%;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- JS ile satırlar buraya eklenecek -->
+  </tbody>
+</table>
+
+<script>
+  // --- F) TEZ YÖNETİCİLİĞİ ---
+  const tezTurleri = [
+    { kod: "F1", metin: "1) Doktora/Sanatta Yeterlik veya Tıp/Diş Hekimliğinde Uzmanlık tez yönetimi" },
+    { kod: "F2", metin: "2) Yüksek Lisans Tez Yönetimi" },
+    { kod: "F3", metin: "3) Doktora/Sanatta Yeterlik (Eş Danışman)" },
+    { kod: "F4", metin: "4) Yüksek Lisans/Sanatta Yeterlik Tez Yönetimi (Eş Danışman)" }
+  ];
+  const tezTbody = document.querySelector("#tez-tablosu tbody");
+
+  tezTurleri.forEach(tur => {
+    const tr = document.createElement("tr");
+    tr.classList.add("tez-satir");
+    tr.innerHTML = `
+      <td style="font-weight:bold;">
+        ${tur.metin}
+        <input type="hidden" name="tez_turu" value="${tur.kod}">
+      </td>
+      <td>
+        <textarea name="tez_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <label>📎 Tez Onay Belgesi (PDF)</label><br>
+        <input type="file" name="tez_pdf" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="yeniTezEkle(this, \`${tur.metin}\`, '${tur.kod}')">
+          Yeni Tez Yöneticiliği Ekle
+        </button>
+      </td>
+    `;
+    tezTbody.appendChild(tr);
+  });
+
+  function yeniTezEkle(button, metin, kod) {
+    const satir = button.closest("tr");
+    const yeniSatir = document.createElement("tr");
+    yeniSatir.classList.add("tez-satir");
+    yeniSatir.innerHTML = `
+      <td style="font-weight:normal;">
+        ➤ ${metin}
+        <input type="hidden" name="tez_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="tez_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <label>📎 Tez Onay Belgesi (PDF)</label><br>
+        <input type="file" name="tez_pdf" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>
+    `;
+    satir.parentNode.insertBefore(yeniSatir, satir.nextSibling);
+  }
+
+  // --- G) PATENTLER ---
+  const patentTurleri = [
+    { kod: "G1", metin: "1) Lisanslanan Uluslararası Patent" },
+    { kod: "G2", metin: "2) Tescillenmiş Uluslararası Patent" },
+    { kod: "G3", metin: "3) Uluslararası Patent Başvurusu" },
+    { kod: "G4", metin: "4) Lisanslanan Ulusal Patent" },
+    { kod: "G5", metin: "5) Tescillenmiş Ulusal Patent" },
+    { kod: "G6", metin: "6) Ulusal Patent Başvurusu" },
+    { kod: "G7", metin: "7) Lisanslanan Faydalı Model, Endüstriyel Tasarım, Marka" },
+    { kod: "G8", metin: "8) Faydalı Model ve Endüstriyel Tasarım" }
+  ];
+  const patentTbody = document.querySelector("#patentler-tablosu tbody");
+
+  patentTurleri.forEach(tur => {
+    const tr = document.createElement("tr");
+    tr.classList.add("patent-satir");
+    tr.innerHTML = `
+      <td>
+        <strong>${tur.metin}</strong>
+        <input type="hidden" name="patent_turu" value="${tur.kod}">
+      </td>
+      <td>
+        <textarea name="patent_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <label>📎 Patent Tescil Belgesini Yükleyiniz (PDF, Maks: 10MB)</label><br>
+        <input type="file" name="patent_dosya" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="yeniPatentEkle(this, \`${tur.metin}\`, '${tur.kod}')">
+          Yeni Patent Ekle
+        </button>
+      </td>
+    `;
+    patentTbody.appendChild(tr);
+  });
+
+  function yeniPatentEkle(button, metin, kod) {
+    const satir = button.closest("tr");
+    const yeniSatir = document.createElement("tr");
+    yeniSatir.classList.add("patent-satir");
+    yeniSatir.innerHTML = `
+      <td style="font-weight: normal;">
+        ➤ ${metin}
+        <input type="hidden" name="patent_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="patent_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        <label>📎 Patent Tescil Belgesini Yükleyiniz (PDF, Maks: 10MB)</label><br>
+        <input type="file" name="patent_dosya" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>
+    `;
+    satir.parentNode.insertBefore(yeniSatir, satir.nextSibling);
+  }
+</script>
+
+
+ <!-- H) ARAŞTIRMA PROJELERİ -->
+<table id="proje-rows" border="1" style="border-collapse:collapse; width:100%;">
+  <thead>
+    <tr>
+      <th colspan="4">
+        H. ARAŞTIRMA PROJELERİ<br>
+        <small>(Projenin en az dokuz ay süreli olduğu, hakem değerlendirmesinden geçtiği belgelenir ve proje bütçesi ilgili katsayıya uygun olmalıdır.)</small>
+      </th>
+    </tr>
+    <tr>
+      <th style="width:30%;">Proje Türü</th>
+      <th style="width:40%;">Proje Bilgisi</th>
+      <th style="width:20%;">Belge Yükle</th>
+      <th style="width:10%;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- JS ile satırlar eklenecek -->
+  </tbody>
+</table>
+
+<!-- I) EDİTÖRLÜK, YAYIN KURULU ÜYELİĞİ VE HAKEMLİK FAALİYETLERİ -->
+<table id="editorluk-rows" border="1" style="border-collapse:collapse; width:100%; margin-top:2rem;">
+  <thead>
+    <tr>
+      <th colspan="4">I. EDİTÖRLÜK, YAYIN KURULU ÜYELİĞİ VE HAKEMLİK FAALİYETLERİ</th>
+    </tr>
+    <tr>
+      <th style="width:30%;">Faaliyet Türü</th>
+      <th style="width:40%;">Üstlendiğiniz Görev ve Süresi</th>
+      <th style="width:20%;">Belge Yükle</th>
+      <th style="width:10%;">Yeni Faaliyet</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- JS ile satırlar eklenecek -->
+  </tbody>
+</table>
+
+<script>
+  // ——— H) ARAŞTIRMA PROJELERİ ———
+  const projeTurleri = [
+    { kod: "H1",  metin: "AB çerçeve programı/NSF/ERC bilimsel araştırma projesinde koordinatör/alt koordinatör olmak" },
+    { kod: "H2",  metin: "AB çerçeve programı/NSF/ERC bilimsel araştırma projesinde yürütücü olmak" },
+    { kod: "H3",  metin: "AB çerçeve programı/NSF/ERC bilimsel araştırma projesinde araştırmacı olmak" },
+    { kod: "H4",  metin: "AB çerçeve dışı uluslararası projelerde koordinatör/alt koordinatör olmak" },
+    { kod: "H5",  metin: "AB çerçeve dışı uluslararası projelerde yürütücü olmak" },
+    { kod: "H6",  metin: "AB çerçeve dışı uluslararası projelerde araştırmacı olmak" },
+    { kod: "H7",  metin: "AB çerçeve dışı uluslararası projelerde danışman olmak" },
+    { kod: "H8",  metin: "TÜBİTAK ARGE/TÜSEB projelerinde yürütücü olmak" },
+    { kod: "H9",  metin: "Diğer TÜBİTAK projelerinde yürütücü olmak" },
+    { kod: "H10", metin: "TÜBİTAK dışındaki kamu kurumlarında yürütücü olmak" },
+    { kod: "H11", metin: "Sanayi kuruluşları ile yapılan Ar-Ge projelerinde yürütücü olmak" },
+    { kod: "H12", metin: "Diğer özel kuruluşlar ile yapılan Ar-Ge projelerinde yürütücü olmak" },
+    { kod: "H13", metin: "TÜBİTAK ARGE (ARDEB, TEYDEB) ve TÜSEB projelerinde araştırmacı olmak" },
+    { kod: "H14", metin: "Diğer TÜBİTAK projelerinde araştırmacı olmak" },
+    { kod: "H15", metin: "TÜBİTAK dışı kamu kurumları projelerinde araştırmacı olmak" },
+    { kod: "H16", metin: "Sanayi kuruluşları ile yapılan projelerde araştırmacı olmak" },
+    { kod: "H17", metin: "Diğer özel kuruluşlarla yapılan projelerde araştırmacı olmak" },
+    { kod: "H18", metin: "TÜBİTAK ARGE ve TÜSEB projelerinde danışman olmak" },
+    { kod: "H19", metin: "Diğer TÜBİTAK projelerinde danışman olmak" },
+    { kod: "H20", metin: "TÜBİTAK dışı kamu kurumları projelerinde danışman olmak" },
+    { kod: "H21", metin: "Sanayi kuruluşlarıyla yapılan projelerde danışman olmak" },
+    { kod: "H22", metin: "Özel kuruluşlarla yapılan projelerde danışman olmak" },
+    { kod: "H23", metin: "BAP projelerinde yürütücü olmak" },
+    { kod: "H24", metin: "BAP projelerinde araştırmacı olmak" },
+    { kod: "H25", metin: "BAP projelerinde danışman olmak" },
+    { kod: "H26", metin: "En az dört aylık yurtdışı araştırma çalışmasında bulunmak" },
+    { kod: "H27", metin: "En az dört aylık yurtiçi araştırma çalışmasında bulunmak" },
+    { kod: "H28", metin: "TÜBİTAK 2209-A, 2209-B, 2242 projelerinde danışman olmak" }
+  ];
+
+  const projeTbody = document.querySelector("#proje-rows tbody");
+  projeTurleri.forEach((tur, idx) => {
+    const tr = document.createElement("tr");
+    tr.classList.add("proje-satir");
+    tr.innerHTML = `
+      <td>
+        <strong>${idx + 1}) ${tur.metin}</strong>
+        <input type="hidden" name="proje_turu" value="${tur.kod}">
+      </td>
+      <td>
+        <textarea name="proje_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        📎 Proje Belgesi: <input type="file" name="proje_belge" accept="application/pdf"><br>
+        📎 Görev Belgesi: <input type="file" name="gorev_belge" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="yeniProjeEkle(this, '${tur.kod}', \`${tur.metin}\`)">
+          Yeni Araştırma Projesi Ekle
+        </button>
+      </td>
+    `;
+    projeTbody.appendChild(tr);
+  });
+
+  function yeniProjeEkle(button, kod, metin) {
+    const satir = button.closest("tr");
+    const yeniSatir = document.createElement("tr");
+    yeniSatir.classList.add("proje-satir");
+    yeniSatir.innerHTML = `
+      <td>
+        ➤ ${metin}
+        <input type="hidden" name="proje_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="proje_detay" rows="3" style="width:100%;"></textarea>
+      </td>
+      <td>
+        📎 Proje Belgesi: <input type="file" name="proje_belge" accept="application/pdf"><br>
+        📎 Görev Belgesi: <input type="file" name="gorev_belge" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>
+    `;
+    satir.parentNode.insertBefore(yeniSatir, satir.nextSibling);
+  }
+
+  // ——— I) EDİTÖRLÜK, YAYIN KURULU ÜYELİĞİ VE HAKEMLİK ———
+  const editorlukAciklamalar = [
+    { kod: "E1",  metin: "SCI-E, SSCI, AHCI veya E-SCI kapsamındaki dergilerde baş editörlük görevinde bulunmak" },
+    { kod: "E2",  metin: "Yardımcı/ortak editörlük görevinde bulunmak" },
+    { kod: "E3",  metin: "Asistan editörlük görevinde bulunmak" },
+    { kod: "E4",  metin: "Yayın kurulu üyeliği" },
+    { kod: "E5",  metin: "SCI-E dışı indeksli dergilerde baş editörlük görevinde bulunmak" },
+    { kod: "E6",  metin: "SCI-E dışı indeksli dergilerde yardımcı/ortak editörlük görevinde bulunmak" },
+    { kod: "E7",  metin: "SCI-E dışı indeksli dergilerde asistan editörlük görevinde bulunmak" },
+    { kod: "E8",  metin: "SCI-E dışı indeksli dergilerde yayın kurulu üyeliği" },
+    { kod: "E9",  metin: "ULAKBİM taramalı dergilerde baş editörlük görevi" },
+    { kod: "E10", metin: "ULAKBİM taramalı dergilerde yayın kurulu üyeliği" },
+    { kod: "E11", metin: "SCI-E, SSCI veya AHCI dergilerde hakemlik (her bir faaliyette)" },
+    { kod: "E12", metin: "Uluslararası indeksli diğer dergilerde hakemlik (her bir faaliyette)" },
+    { kod: "E13", metin: "ULAKBİM taramalı dergilerde hakemlik (her bir faaliyette)" }
+  ];
+
+  const editorlukTbody = document.querySelector("#editorluk-rows tbody");
+  editorlukAciklamalar.forEach((faaliyet, i) => {
+    const tr = document.createElement("tr");
+    tr.classList.add("editorluk-satir");
+    tr.innerHTML = `
+      <td>
+        ${faaliyet.metin}
+        <input type="hidden" name="editorluk_turu" value="${faaliyet.kod}">
+      </td>
+      <td>
+        <textarea name="editorluk_gorev_suresi" rows="3" style="width:100%;" placeholder="Görev ve Süre"></textarea>
+      </td>
+      <td>
+        📎 <input type="file" name="editorluk_gorev_belge" accept="application/pdf"><br>
+        📎 <input type="file" name="editorluk_indeks_belge" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="addSubEditorluk(this, \`${faaliyet.metin}\`, '${faaliyet.kod}')">
+          Yeni Faaliyet Ekle
+        </button>
+      </td>
+    `;
+    editorlukTbody.appendChild(tr);
+  });
+
+  function addSubEditorluk(button, metin, kod) {
+    const satir = button.closest("tr");
+    const yeniSatir = document.createElement("tr");
+    yeniSatir.classList.add("editorluk-satir");
+    yeniSatir.innerHTML = `
+      <td style="font-weight:normal;">
+        ➤ ${metin}
+        <input type="hidden" name="editorluk_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="editorluk_gorev_suresi" rows="3" style="width:100%;" placeholder="Görev ve Süre"></textarea>
+      </td>
+      <td>
+        📎 <input type="file" name="editorluk_gorev_belge" accept="application/pdf"><br>
+        📎 <input type="file" name="editorluk_indeks_belge" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>
+    `;
+    satir.parentNode.insertBefore(yeniSatir, satir.nextSibling);
+  }
+</script>
+
+  
+<!-- J) ÖDÜLLER -->
+<table id="oduller-tablosu" border="1" style="border-collapse:collapse; width:100%;">
+  <thead>
+    <tr>
+      <th colspan="4">J. ÖDÜLLER</th>
+    </tr>
+    <tr>
+      <th style="width:30%;">Ödül Türü</th>
+      <th style="width:40%;">Ödül Veren Kurul/Kurum, Yılı</th>
+      <th style="width:15%;">Belge</th>
+      <th style="width:15%;"></th>
+    </tr>
+  </thead>
+  <tbody id="odul-rows">
+    <!-- JS ile satırlar eklenecek -->
+  </tbody>
+</table>
+
+<!-- K) İDARİ GÖREVLER VE ÜNİVERSİTEYE KATKI FAALİYETLERİ -->
+<table id="idari-gorev-rows" border="1" style="border-collapse:collapse; width:100%; margin-top:2rem;">
+  <thead>
+    <tr>
+      <th colspan="4">
+        K. İDARİ GÖREVLER VE ÜNİVERSİTEYE KATKI FAALİYETLERİ<br>
+        <small>
+          (İdari görevlerde vekaleten de olsa en az 6 ay görev yapmış olmak, aynı anda birden fazla idari görevi olanlar için en yüksek puan dikkate alınır ve normal süresi dolup yeniden atamalar ayrıca puanlanır. Bu kısımda en fazla 50 puan dikkate alınır)
+        </small>
+      </th>
+    </tr>
+    <tr>
+      <th style="width:30%;"></th>
+      <th style="width:40%;">Görev Birimi, Yılı</th>
+      <th style="width:20%;">Belge Yükle</th>
+      <th style="width:10%;"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- JS ile satırlar eklenecek -->
+  </tbody>
+</table>
+
+<script>
+  // J) ÖDÜLLER
+  const odulTurleri = [
+    { kod: "D1", metin: "Sürekli ve periyodik uluslararası bilim & sanat ödülleri" },
+    { kod: "D2", metin: "TÜBİTAK Bilim, Özel ve Hizmet Ödülleri" },
+    { kod: "D3", metin: "TÜBA Akademi Ödülleri" },
+    { kod: "D4", metin: "TÜBİTAK Teşvik Ödülü" },
+    { kod: "D5", metin: "TÜBA GEBİP & TESEP ödülleri" },
+    { kod: "D6", metin: "Sürekli ve periyodik ulusal bilim & sanat ödülleri" },
+    { kod: "D7", metin: "Jürisiz ulusal/uluslararası ödüller" },
+    { kod: "D8", metin: "Uluslararası hakemli yarışmalarda birincilik" },
+    { kod: "D9", metin: "… ikincilik" },
+    { kod: "D10", metin: "… üçüncülük" },
+    { kod: "D11", metin: "Ulusal hakemli yarışmalarda birincilik" },
+    { kod: "D12", metin: "… ikincilik" },
+    { kod: "D13", metin: "… üçüncülük" }
+  ];
+
+  const odulTbody = document.querySelector("#odul-rows");
+  odulTurleri.forEach((tur, i) => {
+    const tr = document.createElement("tr");
+    tr.classList.add("odul-satir");
+    tr.innerHTML = `
+      <td>
+        ${tur.metin}
+        <input type="hidden" name="odul_turu" value="${tur.kod}">
+      </td>
+      <td>
+        <textarea name="odul_kurul" rows="3" style="width:100%;" placeholder="Kurul/Kurum, Yıl"></textarea>
+      </td>
+      <td>
+        📎 <input type="file" name="odul_belge" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="yeniOdulEkle(this, \`${tur.metin}\`, '${tur.kod}')">
+          Yeni Ödül Ekle
+        </button>
+      </td>
+    `;
+    odulTbody.appendChild(tr);
+  });
+
+  function yeniOdulEkle(btn, metin, kod) {
+    const satir = btn.closest("tr");
+    const yeni = document.createElement("tr");
+    yeni.classList.add("odul-satir");
+    yeni.innerHTML = `
+      <td style="font-weight:normal;">
+        ➤ ${metin}
+        <input type="hidden" name="odul_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="odul_kurul" rows="3" style="width:100%;" placeholder="Kurul/Kurum, Yıl"></textarea>
+      </td>
+      <td>
+        📎 <input type="file" name="odul_belge" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>
+    `;
+    satir.parentNode.insertBefore(yeni, satir.nextSibling);
+  }
+
+  // K) İDARİ GÖREVLER VE ÜNİVERSİTEYE KATKI FAALİYETLERİ
+  const idariGorevTurleri = [
+    { kod: "K1",  metin: "Dekan/Enstitü/Yüksekokul/MYO/Merkez Müdürü" },
+    { kod: "K2",  metin: "Enstitü Müdür Yrd. / Dekan Yrd. / ..." },
+    { kod: "K3",  metin: "Bölüm Başkan Yrd. / Anabilim Dalı Başkanı" },
+    { kod: "K4",  metin: "Rektörlükçe görevlendirilen Koordinatörlük" },
+    { kod: "K5",  metin: "Rektörlükçe görevlendirilen Koordinatör Yardımcıları" },
+    { kod: "K6",  metin: "Rektörlükçe görevlendirilen üniversite düzeyinde Komisyon/Kurul üyelikleri" },
+    { kod: "K7",  metin: "Dekanlık/Y.O. Müdürlüğü/... görevlendirilen Komisyon/Kurul üyelikleri" },
+    { kod: "K8",  metin: "Bölüm Başkanlıkları tarafından görevlendirilen Komisyon/Kurul üyelikleri" },
+    { kod: "K9",  metin: "Rektörlük/Dekanlık/... eğitim, işbirliği vb. konularda katkı sağlamak" },
+    { kod: "K10", metin: "Uluslararası nitelikteki bilimsel ve mesleki kurum/kuruluşlarda görev almak" },
+    { kod: "K11", metin: "Ulusal nitelikteki bilimsel ve mesleki kurum/kuruluşlarda görev almak" },
+    { kod: "K12", metin: "Yerel nitelikteki bilimsel ve mesleki kurum/kuruluşlarda görev almak" }
+  ];
+
+  const idariTbody = document.querySelector("#idari-gorev-rows");
+  idariGorevTurleri.forEach((gorev, idx) => {
+    const tr = document.createElement("tr");
+    tr.classList.add("idari-satir");
+    tr.innerHTML = `
+      <td>
+        ${gorev.metin}
+        <input type="hidden" name="idari_gorev_turu" value="${gorev.kod}">
+      </td>
+      <td>
+        <textarea name="idari_gorev_detay" rows="3" style="width:100%;" placeholder="Görev Birimi, Yıl"></textarea>
+      </td>
+      <td>
+        📎 <input type="file" name="idari_gorev_belgesi" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="yeniIdariEkle(this, \`${gorev.metin}\`, '${gorev.kod}')">
+          Yeni Görev Ekle
+        </button>
+      </td>
+    `;
+    idariTbody.appendChild(tr);
+  });
+
+  function yeniIdariEkle(button, metin, kod) {
+    const satir = button.closest("tr");
+    const yeni = document.createElement("tr");
+    yeni.classList.add("idari-satir");
+    yeni.innerHTML = `
+      <td style="font-weight:normal;">
+        ➤ ${metin}
+        <input type="hidden" name="idari_gorev_turu" value="${kod}">
+      </td>
+      <td>
+        <textarea name="idari_gorev_detay" rows="3" style="width:100%;" placeholder="Görev Birimi, Yıl"></textarea>
+      </td>
+      <td>
+        📎 <input type="file" name="idari_gorev_belgesi" accept="application/pdf">
+      </td>
+      <td>
+        <button type="button" onclick="this.closest('tr').remove()">Vazgeç</button>
+      </td>
+    `;
+    satir.parentNode.insertBefore(yeni, satir.nextSibling);
+  }
+</script>
+
+
+<!-- L) GÜZEL SANATLAR FAALİYETLERİ (Konservatuvar dahil) -->
+<table id="guzelSanatlar-table" border="1" style="width:100%; border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th colspan="3" style="padding:8px; text-align:center;">
+        L. GÜZEL SANATLAR FAALİYETLERİ (Konservatuvar dahil)
+      </th>
+    </tr>
+    <tr>
+      <th style="width:30%; padding:8px; vertical-align:top;">Açıklama</th>
+      <th style="width:40%; padding:8px; vertical-align:top;">Faaliyet Adı, Yılı ve Yeri</th>
+      <th style="width:30%; padding:8px; vertical-align:top;">
+        Belge Yükle<br>
+        <small style="font-size:0.75em; color:#555;">
+          (Satış/Telif Belgesi, Etkinlik Afişi, Katılım Sertifikası,<br>
+          Medya Haberleri, Resmi Onay Belgeleri vb.)
+        </small>
+      </th>
+    </tr>
+  </thead>
+  <tbody id="guzelSanatlar-rows">
+    <!-- JS ile satırlar buraya eklenecek -->
+  </tbody>
+</table>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const guzelTbody = document.getElementById("guzelSanatlar-rows");
+
+    const guzelSanatlarAciklamalar = [
+  { kod: "L1", metin: "Özgün sanat eserlerinin, tasarım veya yorum çalışmalarının yurt dışında sanat, eğitim ve kültür kurumlarınca satın alınması veya bu eser(ler) için telif ödenmesi (Kurumlar bazında puanlama yapılır)" },
+  { kod: "L2", metin: "Özgün sanat eserlerinin, tasarım veya yorum çalışmalarının yurt içinde sanat, eğitim ve kültür kurumlarınca satın alınması veya bu eser(ler) için telif ödenmesi (Kurumlar bazında puanlama yapılır)" },
+  { kod: "L3", metin: "Yerel Yönetimler veya Özel Kuruluşların desteklediği kamusal alanda kalıcı olarak gerçekleştirilen sanat projeleri (Heykel, Duvar Resmi / Graffiti, Enstalasyon vb.) (Kurumlar bazında puanlama yapılır)" },
+  { kod: "L4", metin: "Galerilerde, müzelerde, sanat ve kültür merkezlerinde gerçekleştirilen Küratörlük etkinlikleri (En fazla iki kez puanlanır)" },
+  { kod: "L5", metin: "Özgün sanat eserleri, tasarımlar ya da yorum/icra çalışmalarıyla yurtdışında uluslararası jürili kişisel etkinlikte (sergi, bienal, sempozyum, trienal, gösteri, kareografi, performans, resital, dinleti, konser, kompozisyon, orkestra şefliği, festival, gösterim) bizzat katılım sağlayarak bulunmak." },
+  { kod: "L6", metin: "Özgün sanat eserleri, tasarımlar ya da yorum/icra çalışmalarıyla yurtiçinde jürili kişisel etkinlikte (sergi, bienal, sempozyum, trienal, gösteri, kareografi, performans, resital, dinleti, konser, kompozisyon, orkestra şefliği, festival, gösterim) bizzat katılım sağlayarak bulunmak." },
+  { kod: "L7", metin: "Özgün sanat eserleri, tasarımlar ya da yorum/icra çalışmalarıyla yurtdışında uluslararası jürili karma-ortak etkinlikte (sergi, bienal, sempozyum, trienal, gösteri, kareografi, performans, resital, dinleti, konser, kompozisyon, orkestra şefliği, festival, gösterim) bizzat katılım sağlayarak bulunmak." },
+  { kod: "L8", metin: "Özgün sanat eserleri, tasarımlar ya da yorum/icra çalışmalarıyla yurtiçinde ulusal jürili karma-ortak etkinlikte (sergi, bienal, sempozyum, trienal, gösteri, kareografi, performans, resital, dinleti, konser, kompozisyon, orkestra şefliği, festival, gösterim) bizzat katılım sağlayarak bulunmak." },
+  { kod: "L9", metin: "Uluslararası çalıştay/workshop (atölye çalışması)/uygulamalı sempozyum/yarışma/festival/şenlikte yöneticilik veya yürütücülük" },
+  { kod: "L10", metin: "Ulusal çalıştay/workshop (atölye çalışması)/uygulamalı sempozyum/yarışma/festival/şenlikte yöneticilik veya yürütücülük" },
+  { kod: "L11", metin: "Uluslararası çalıştay/workshop (atölye çalışması)/uygulamalı sempozyum/yarışma/festival/şenlikte araştırmacılık/kurul üyeliği" },
+  { kod: "L12", metin: "Ulusal çalıştay/workshop (atölye çalışması)/uygulamalı sempozyum/yarışma/festival/şenlikte araştırmacılık/kurul üyeliği" },
+  { kod: "L13", metin: "Uluslararası yarışmalarda/festivallerde/şenliklerde jüri üyeliği" },
+  { kod: "L14", metin: "Ulusal yarışmalarda/festivallerde/şenliklerde jüri üyeliği" },
+  { kod: "L15", metin: "Üretilen eserlerin uluslararası haber veya yayın organlarında yer alması veya gösterime ya da dinletime girmesi (her bir etkinlik için ayrı puanlanır ve her bir etkinlik için 5 haber ile sınırlıdır)" },
+  { kod: "L16", metin: "Üretilen eserlerin ulusal haber veya yayın organlarında yer alması veya gösterime ya da dinletime girmesi (her bir etkinlik için ayrı puanlanır ve her bir etkinlik için 5 haber ile sınırlıdır)" },
+  { kod: "L17", metin: "Uluslararası resital icra etmek" },
+  { kod: "L18", metin: "Uluslararası Konserlerde, Orkestra, Koro, Geleneksel Topluluklar konserinde solist icracı olarak yer almak" },
+  { kod: "L19", metin: "Uluslararası Konserlerde, Orkestra, Koro, Geleneksel Topluluklar konserinde karma icracı olarak yer almak" },
+  { kod: "L20", metin: "Uluslararası Konserlerde, Orkestra Şefliği, Müzik Topluluğu Şefliği ve Koro Şefliği" },
+  { kod: "L21", metin: "Ulusal Konserlerde, Oda Müziği Konserinde icracı olarak yer almak" },
+  { kod: "L22", metin: "Ulusal Konserlerde, Orkestra Konserinde Grup Şefi olarak yer almak" },
+  { kod: "L23", metin: "Ulusal Konserlerde, Orkestra Konserinde Grup Üyesi olarak yer almak" },
+  { kod: "L24", metin: "Ulusal Konserlerde, Resital veya koro konserinde eşlikçi olarak yer almak" },
+  { kod: "L25", metin: "Ulusal Konserlerde, Konser yönetmenliği / dinleti koordinatörlüğü" },
+  { kod: "L26", metin: "Ulusal resital icra etmek" },
+  { kod: "L27", metin: "Ulusal Konserlerde, Orkestra veya koro konserinde icracı olarak bireysel dinletide bulunmak" },
+  { kod: "L28", metin: "Ulusal Konserlerde, Orkestra veya koro konserinde icracı olarak karma dinletide bulunmak" },
+  { kod: "L29", metin: "Ulusal Konserlerde, Orkestra Şefliği, Müzik Topluluğu Şefliği ve Koro Şefliği" },
+  { kod: "L30", metin: "Ulusal Konserlerde, Oda Müziği Konserinde icracı olarak yer almak" },
+  { kod: "L31", metin: "Ulusal Konserlerde, Orkestra Konserinde Grup Şefi olarak yer almak" },
+  { kod: "L32", metin: "Ulusal Konserlerde, Orkestra Konserinde Grup Üyesi olarak yer almak" },
+  { kod: "L33", metin: "Ulusal Konserlerde, Resital veya koro konserinde eşlikçi olarak yer almak" },
+  { kod: "L34", metin: "Ulusal Konserlerde, Konser yönetmenliği / dinleti koordinatörlüğü" },
+  { kod: "L35", metin: "Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, icracı, besteci, orkestra şefi, müzik topluluğu şefi veya koro şefi olarak bireysel ses yayını" },
+  { kod: "L36", metin: "Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, icracı, besteci, orkestra şefi, müzik topluluğu şefi veya koro şefi olarak karma ses yayını" },
+  { kod: "L37", metin: "Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, Genel Sanat Yönetmeni/Müzik yönetmeni olarak ses yayını hazırlamak" },
+  { kod: "L38", metin: "Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği - Program Hazırlamak" },
+  { kod: "L39", metin: "Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği Katılımcılığı - Bireysel" },
+  { kod: "L40", metin: "Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği Katılımcılığı - Karma" },
+  { kod: "L41", metin: "Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, İcracı, besteci, orkestra şefi, müzik topluluğu şefi veya koro şefi olarak bireysel ses yayını" },
+  { kod: "L42", metin: "Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, İcracı, besteci, orkestra şefi, müzik topluluğu şefi veya koro şefi olarak karma ses yayını" },
+  { kod: "L43", metin: "Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, Genel Sanat Yönetmeni/Müzik yönetmeni olarak ses yayını hazırlamak" },
+  { kod: "L44", metin: "Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği - Program Hazırlamak" },
+  { kod: "L45", metin: "Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği Katılımcılığı - Bireysel" },
+  { kod: "L46", metin: "Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği Katılımcılığı - Karma" },
+  { kod: "L47", metin: "Ulusal Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 0 – 5 dakikalık eser sahibi olmak" },
+  { kod: "L48", metin: "Ulusal Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 5 – 10 dakikalık eser sahibi olmak" },
+  { kod: "L49", metin: "Ulusal Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 10 – 15 dakikalık eser sahibi olmak" },
+  { kod: "L50", metin: "Ulusal Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 15 ve üzeri dakikalık eser sahibi olmak" },
+  { kod: "L51", metin: "Ulusal Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 0 – 5 dakikalık eser sahibi olmak" },
+  { kod: "L52", metin: "Ulusal Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 5 – 10 dakikalık eser sahibi olmak" },
+  { kod: "L53", metin: "Ulusal Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 10 – 15 dakikalık eser sahibi olmak" },
+  { kod: "L54", metin: "Ulusal Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 15 ve üzeri dakikalık eser sahibi olmak" },
+  { kod: "L55", metin: "Ulusal Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 0 – 5 dakikalık eser sahibi olmak" },
+  { kod: "L56", metin: "Ulusal Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 5 – 10 dakikalık eser sahibi olmak" },
+  { kod: "L57", metin: "Ulusal Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 10 – 15 dakikalık eser sahibi olmak" },
+  { kod: "L58", metin: "Ulusal Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 15 ve üzeri dakikalık eser sahibi olmak" },
+  { kod: "L59", metin: "Uluslararası Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 0 – 5 dakikalık eser sahibi olmak" },
+  { kod: "L60", metin: "Uluslararası Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 5 – 10 dakikalık eser sahibi olmak" },
+  { kod: "L61", metin: "Uluslararası Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 10 – 15 dakikalık eser sahibi olmak" },
+  { kod: "L62", metin: "Uluslararası Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 15 ve üzeri dakikalık eser sahibi olmak" },
+  { kod: "L63", metin: "Uluslararası Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 0 – 5 dakikalık eser sahibi olmak" },
+  { kod: "L64", metin: "Uluslararası Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 5 – 10 dakikalık eser sahibi olmak" },
+  { kod: "L65", metin: "Uluslararası Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 10 – 15 dakikalık eser sahibi olmak" },
+  { kod: "L66", metin: "Uluslararası Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 15 ve üzeri dakikalık eser sahibi olmak" },
+  { kod: "L67", metin: "Uluslararası Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 0 – 5 dakikalık eser sahibi olmak" },
+  { kod: "L68", metin: "Uluslararası Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 5 – 10 dakikalık eser sahibi olmak" },
+  { kod: "L69", metin: "Uluslararası Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 10 – 15 dakikalık eser sahibi olmak" },
+  { kod: "L70", metin: "Uluslararası Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 15 ve üzeri dakikalık eser sahibi olmak" },
+  { kod: "L71", metin: "Türk Müziği makamlarını kullanarak geleneksel formlar (ayin, peşrev, kâr, kârçe, ağır semâi, yürük semâi, beste, şarkı vb …) çerçevesinde oluşturulmuş kompozisyonlar. Bestelenmiş Eser Sahibi Olmak (Nota ile belgelemek koşulu ile)" },
+  { kod: "L72", metin: "Türk Müziği makamlarını kullanarak geleneksel formlar (ayin, peşrev, kâr, kârçe, ağır semâi, yürük semâi, beste, şarkı vb …) çerçevesinde oluşturulmuş kompozisyonlar. Bestelenmiş ve Seslendirilmiş Eser Sahibi Olmak (ulusal konser veya ses yayını)" },
+  { kod: "L73", metin: "Türk Müziği makamlarını kullanarak geleneksel formlar (ayin, peşrev, kâr, kârçe, ağır semâi, yürük semâi, şarkı beste vb …) çerçevesinde oluşturulmuş kompozisyonlar. Bestelenmiş ve Seslendirilmiş Eser Sahibi Olmak (uluslararası konser veya yurt dışında basılmış ses yayını)" },
+  { kod: "L74", metin: "Türk Halk Müziği alanında derleme yapmak. (TRT Müzik Dairesi Bşk. Repertuvar Kurulu tarafından onaylanmış)" },
+  { kod: "L75", metin: "Türk Halk Müziği alanında derleme yapmak. (Nota ile belgelemek koşulu ile)" },
+  { kod: "L76", metin: "Türk Halk Müziği alanında derlenmiş parçanın notaya alınması (TRT Müzik Dairesi Bşk. Repertuvar kurulu tarafından onaylanmış)" },
+  { kod: "L77", metin: "Büyük oyun /film yönetmenliği" },
+  { kod: "L78", metin: "Kısa oyun/film yönetmenliği" },
+  { kod: "L79", metin: "Sahne oyunu / senaryo (uzun) ve dizi drama yazarlığı" },
+  { kod: "L80", metin: "Kısa sahne oyunu ve senaryo yazarlığı" },
+  { kod: "L81", metin: "Uyarlama oyun/senaryo yazmak, metin düzenlemek (uzun)" },
+  { kod: "L82", metin: "Uyarlama oyun/senaryo yazmak, metin düzenlemek (kısa)" },
+  { kod: "L83", metin: "Uzun oyun/senaryo/dizi drama dramaturjisi yapmak" },
+  { kod: "L84", metin: "Kısa oyun/senaryo dramaturjisi yapmak" },
+  { kod: "L85", metin: "Uzun oyun/senaryo/ dizi drama metni çevirmek" },
+  { kod: "L86", metin: "Kısa oyun/senaryo metni çevirmek" },
+  { kod: "L87", metin: "Uzun oyunda/sinema filminde/dizi dramada başrol" },
+  { kod: "L88", metin: "Uzun oyunda/sinema filminde/dizi dramada diğer roller" },
+  { kod: "L89", metin: "Kısa oyun/filmde başrol" },
+  { kod: "L90", metin: "Kısa oyun/filmde diğer roller" },
+  { kod: "L91", metin: "Sahne oyunu/ film (uzun) ve dizi drama dekor / kostüm / ışık / ses / efekt tasarımı" },
+  { kod: "L92", metin: "Sahne oyunu/ film (uzun) ve dizi drama dekor / kostüm / ışık / ses / efekt tasarımı ekibinde görev almak" },
+  { kod: "L93", metin: "Sahne oyunu/ film (kısa) dekor / kostüm / ışık / ses / efekt tasarımı" },
+  { kod: "L94", metin: "Sahne oyunu/ film (kısa) dekor / kostüm / ışık / ses / efekt tasarımı ekibinde görev almak" },
+  { kod: "L95", metin: "Sahne oyunu/ film (uzun) ve dizi dramada makyaj, mask, kukla, butafor vb tasarımı 15" },
+  { kod: "L96", metin: "Sahne oyunu/ film (uzun) ve dizi dramada makyaj, mask, kukla, butafor vb tasarımı ekibinde görev almak" },
+  { kod: "L97", metin: "Sahne oyunu/ film (kısa) makyaj, mask, kukla, butafor vb tasarımı" },
+  { kod: "L98", metin: "Sahne oyunu/ film (kısa) makyaj, mask, kukla, butafor vb tasarımı ekibinde görev almak" },
+  { kod: "L99", metin: "Sanat yönetmenliği (uzun prodüksiyonlar)" },
+  { kod: "L100", metin: "Sanat yönetmenliği (kısa prodüksiyonlar)" },
+  { kod: "L101", metin: "Koreografi, dramatizasyon, dinleti, performans, happening veya workshop (atölye) düzenleme/yönetme" },
+  { kod: "L102", metin: "Kongre, sempozyum, festival etkinliklerinde atölye çalışması düzenlemek" },
+  { kod: "L103", metin: "Yapıtın festival, şenlik vb. etkinliklere katılımı" },
+  { kod: "L104", metin: "Oyunun/senaryonun/filmin/sergilenmiş oyunun video kaydının vb. kamu/özel TV’ler/dijital platformlar/kurumsal kimlikli internet siteleri vb tarafından satın alınması/gösterilmesi; Devlet Tiyatroları/Şehir Tiyatroları vb tiyatroların repertuvarlarına girmesi" },
+  { kod: "L105", metin: "En az 10 kere gerçekleştirilmiş olan sanatsal bir yarışma/ödül organizasyonu tarafından yapıtın/sanatçının ödüllendirilmesi" }
+];
+
+    guzelSanatlarAciklamalar.forEach(faaliyet => {
+      const tr = document.createElement("tr");
+      tr.classList.add("guzel-sanat-satir");
+      tr.innerHTML = `
+        <td style="padding:8px; vertical-align:top;">
+          ${faaliyet.metin}
+          <input type="hidden" name="faaliyet_turu" value="${faaliyet.kod}">
+        </td>
+        <td style="padding:8px;">
+          <textarea name="faaliyet_detay" rows="3" style="width:100%; box-sizing:border-box;"></textarea>
+        </td>
+        <td style="padding:8px; text-align:center;">
+          <input type="file" name="faaliyet_belge" accept="application/pdf,image/*">
+        </td>
+      `;
+      guzelTbody.appendChild(tr);
+    });
+  });
+</script>
+
+
+<div style="margin-top:1.5rem; text-align:center;">
+  <label>
+    <input type="checkbox"
+           id="onayKutusu"
+           style="margin-right:.5rem;">
+    Belgelerimin doğruluğunu onaylıyorum
+  </label>
+</div>
+
+<div style="text-align:center; margin-top:1rem;">
+  <button type="submit"
+          id="basvuruButton"
+          class="btn btn-primary"
+          disabled>
+    Başvuru Gönder
+  </button>
+</div>
+</form>
+
+{# Modal Başlangıç #}
+<div id="resultModal" class="modal">
+<div class="modal-content">
+  <span class="close" id="modalClose">&times;</span>
+  <h2>Başvuru Tamamlandı!</h2>
+  <p>Başvurunuz başarıyla gönderildi.</p>
+  <div class="button-group">
+    <a href="{% url 'basvuru_pdf' %}"
+       class="btn btn-success"
+       target="_blank">
+      PDF İndir
+    </a>
+    <a href="{% url 'ilanlar' %}"
+       class="btn btn-secondary">
+      Ana Sayfaya Dön
+    </a>
+  </div>
+</div>
+</div>
+{# Modal Bitiş #}
+
+<style>
+.modal {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background: rgba(0,0,0,0.5);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 9999;
+}
+.modal-content {
+background: #fff;
+padding: 20px;
+border-radius: 8px;
+width: 360px;
+box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+position: relative;
+text-align: center;
+}
+.close {
+position: absolute;
+top: 10px; right: 12px;
+font-size: 24px;
+cursor: pointer;
+color: #999;
+}
+.close:hover { color: #333; }
+.button-group .btn {
+margin: .5rem;
+padding: .5rem 1rem;
+text-decoration: none;
+border-radius: 4px;
+}
+.btn-success { background: #28a745; color: #fff; }
+.btn-secondary { background: #6c757d; color: #fff; }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const onayKutusu    = document.getElementById('onayKutusu');
+    const basvuruButton = document.getElementById('basvuruButton');
+    const resultModal   = document.getElementById('resultModal');
+    const modalClose    = document.getElementById('modalClose');
+  
+    // Checkbox ile butonu aktif/pasif et
+    onayKutusu.addEventListener('change', () => {
+      basvuruButton.disabled = !onayKutusu.checked;
+    });
+  
+    // Modal “×” butonuna tıklayınca kapat
+    modalClose.addEventListener('click', () => {
+      resultModal.style.display = 'none';
+    });
+    window.addEventListener('click', e => {
+      if (e.target === resultModal) {
+        resultModal.style.display = 'none';
+      }
+    });
+  
+    // Eğer view’dan show_modal=True gelmişse modal’ı aç
+    {% if show_modal %}
+      resultModal.style.display = 'flex';
+    {% endif %}
+  });
+  </script>
+  

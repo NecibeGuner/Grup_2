@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Başvuru Özeti</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1, h2 { margin-bottom: .5em; }
+    table { width:100%; border-collapse: collapse; margin-bottom: 1em; }
+    th, td { border:1px solid #000; padding:6px; vertical-align: top; }
+    th { background:#f2f2f2; text-align:center; }
+    ul { margin:0 0 1em 1.2em; }
+    .small { font-size:.9em; color:#555; }
+  </style>
+</head>
+<body>
+
+  <h1>Genel Puanlama Bilgileri</h1>
+  <table>
+    <tr><th>Adı Soyadı (Unvan)</th><td>{{ isim }}</td></tr>
+    <tr><th>Tarih</th><td>{{ tarih }}</td></tr>
+    <tr><th>Bulunduğu Kurum</th><td>{{ kurum }}</td></tr>
+    <tr><th>Başvurduğu Kadro</th><td>{{ kadro }}</td></tr>
+    <tr><th>İmza</th><td>{{ imza }}</td></tr>
+  </table>
+
+  <h2>Puanlanan Faaliyet Dönemi</h2>
+  {% comment %} Seçilen faaliyet dönemini listele {% endcomment %}
+  {% if profesor or docent or drOgrUyesi %}
+    <ul>
+      {% if profesor %}
+        <li>Profesör (Doçent sonrası faaliyetler)</li>
+      {% endif %}
+      {% if docent %}
+        <li>Doçent (Doktora/Sanatta yeterlik sonrası)</li>
+      {% endif %}
+      {% if drOgrUyesi %}
+        <li>Dr. Öğretim Üyesi (Yeniden atama sonrası)</li>
+      {% endif %}
+    </ul>
+  {% else %}
+    <p class="small"><em>(Puanlanan faaliyet dönemi seçilmemiş.)</em></p>
+  {% endif %}
+
+  {% if makaleler %}
+    <h2>A. Makaleler</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in makaleler %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if toplantilar %}
+    <h2>B. Bilimsel Toplantı Faaliyetleri</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in toplantilar %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if kitaplar %}
+    <h2>C. Kitaplar</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in kitaplar %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if atiflar %}
+    <h2>D. Atıflar</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in atiflar %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if egitimler %}
+    <h2>E. Eğitim-Öğretim Faaliyetleri</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in egitimler %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if tezler %}
+    <h2>F. Tez Yönetimi</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in tezler %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if patentler %}
+    <h2>G. Patentler</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in patentler %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if projeler %}
+    <h2>H. Araştırma Projeleri</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in projeler %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if editorluklar %}
+    <h2>I. Editörlük / Hakemlik</h2>
+    <table>
+      <tr><th>Tür</th><th>Görev & Süre</th></tr>
+      {% for tur, gorev in editorluklar %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ gorev|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if oduller %}
+    <h2>J. Ödüller</h2>
+    <table>
+      <tr><th>Tür</th><th>Kurul / Yıl</th></tr>
+      {% for tur, kurul in oduller %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ kurul|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if idari_gorevler %}
+    <h2>K. İdari Görevler & Katkılar</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in idari_gorevler %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if guzel_sanatlar %}
+    <h2>L. Güzel Sanatlar Faaliyetleri</h2>
+    <table>
+      <tr><th>Tür</th><th>Detay</th></tr>
+      {% for tur, detay in guzel_sanatlar %}
+        <tr>
+          <td>{{ tur }}</td>
+          <td>{{ detay|linebreaksbr }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+</body>
+</html>

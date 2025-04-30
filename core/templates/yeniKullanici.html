@@ -1,0 +1,252 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Kullanıcı Oluşturma Sayfası" />
+        <meta name="author" content="KOÜ Bilgi Sistemi" />
+      
+        <title>Kullanıcı Oluşturma - KOÜ Bilgi Sistemi</title>
+      
+        <!-- Simple-DataTables CSS (yerel static dosyadan) -->
+        <link href="{% static 'vendor/simple-datatables/style.css' %}" rel="stylesheet" />
+      
+        <!-- Projeye özel CSS -->
+        <link href="{% static 'css/yazlab_admin/styles.css' %}" rel="stylesheet" />
+      
+        <!-- FontAwesome İkonları (CDN) -->
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f8f9fa;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                background-color: #ffffff;
+                max-width: 600px;
+                margin: 40px auto;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            h2 {
+                text-align: center;
+                color: #333;
+                margin-bottom: 20px;
+            }
+            label {
+                display: block;
+                margin-bottom: 6px;
+                font-weight: bold;
+                color: #555;
+            }
+            input[type="text"],
+            input[type="password"] {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 20px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+            .submit-btn {
+                background-color: #0d6efd;
+                color: #fff;
+                padding: 12px 20px;
+                border: none;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+                width: 100%;
+                transition: background-color 0.3s ease;
+            }
+            .submit-btn:hover {
+                background-color: #0b5ed7;
+            }
+            .breadcrumb {
+                margin-bottom: 20px;
+                font-size: 14px;
+            }
+            .breadcrumb a {
+                text-decoration: none;
+                color: #0d6efd;
+            }
+        </style>
+
+
+    </head>
+    <body class="sb-nav-fixed">
+        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+          <a class="navbar-brand ps-3" href="{% url 'home' %}">Admin Paneli</a>
+          <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+          <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-user fa-fw"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="#!">Ayarlar</a></li>
+                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="{% url 'giris' %}">Çıkış</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      
+        <div id="layoutSidenav">
+          <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+              <div class="sb-sidenav-menu">
+                <div class="nav">
+                  <div class="sb-sidenav-menu-heading">Menü</div>
+                  <a class="nav-link" href="{% url 'home' %}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    Ana Sayfa
+                  </a>
+                  <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseBasvurular">
+                    <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                    Başvurular
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                  </a>
+                  <div class="collapse" id="collapseBasvurular" data-bs-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                      <a class="nav-link" href="{% url 'tablesYeniB' %}">Yeni Başvurular</a>
+                      <a class="nav-link" href="{% url 'tablesDevamB' %}">Devam Eden Başvurular</a>
+                      <a class="nav-link" href="{% url 'tablesBitenB' %}">Biten Başvurular</a>
+                      <a class="nav-link" href="{% url 'tablesSonuclanan_basvurular' %}">Sonuçlanan Başvurular</a>
+                    </nav>
+                  </div>
+                  <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages">
+                    <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                    Sistem Ayarları
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                  </a>
+                  <div class="collapse" id="collapsePages" data-bs-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
+                      <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth">
+                        Kullanıcı Ayarları
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                      </a>
+                      <div class="collapse" id="pagesCollapseAuth" data-bs-parent="#sidenavAccordionPages">
+                        <nav class="sb-sidenav-menu-nested nav">
+                          <a class="nav-link" href="{% url 'yeniKullanici' %}">Kayıt Oluşturma</a>
+                          <a class="nav-link" href="{% url 'kayitli_kullanicilar' %}">Kullanıcılar</a>
+                        </nav>
+                      </div>
+                    </nav>
+                  </div>
+                  <a class="nav-link" href="{% url 'tables' %}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                    Bildirimler ve Mailler
+                  </a>
+                </div>
+              </div>
+              <div class="sb-sidenav-footer">
+                <div class="small">Giriş Yapıldı:</div>
+                Admin A
+              </div>
+            </nav>
+          </div>
+      
+          <div id="layoutSidenav_content">
+            <main>
+              <div class="container-fluid px-4">
+                <h1 class="mt-4">KULLANICI OLUŞTURMA</h1>
+                <ol class="breadcrumb mb-4">
+                  <li class="breadcrumb-item"><a href="{% url 'home' %}">Ana Sayfa</a></li>
+                  <li class="breadcrumb-item active">Yeni Kullanıcı Oluşturma</li>
+                </ol>
+                <div class="card mb-4">
+                  <div class="card-body">
+                    <div class="container">
+                      <h2>Kullanıcı Oluşturma</h2>
+                      <div id="alert-container"></div>
+                      <form id="kayitForm" action="{% url 'kullanici_kaydet' %}" method="post">
+                        {% csrf_token %}
+  
+                        <label for="isim">İsim:</label>
+                        <input type="text" id="isim" name="isim" required>
+
+                         <label for="soyisim">Soy İsim:</label>
+                          <input type="text" id="soyisim" name="soyisim" required>
+
+                        <label for="tc">TC Kimlik Numarası:</label>
+                        <input type="text" id="tc" name="tc" maxlength="11" required>
+
+                        <label for="dogumTarihi">Doğum Tarihi:</label>
+                        <input type="date" id="dogumTarihi" name="dogumTarihi" required>
+
+                         <label for="unvan">Ünvan:</label>
+                         <input type="text" id="unvan" name="unvan">
+
+                         <label for="rol">Kullanıcı Rolü:</label>
+                          <select id="rol" name="rol" required>
+                              <option value="">Seçiniz</option>
+                              <option value="aday">Aday</option>
+                              <option value="juri">Jüri</option>
+                              <option value="yönetici">Yönetici</option>
+                              <option value="admin">Admin</option>
+                          </select>
+
+                       <label for="sifre">Şifre:</label>
+                       <input type="password" id="sifre" name="sifre" required>
+
+                       <button type="submit" class="submit-btn">Kullanıcıyı Kaydet</button>
+                    </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+              <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                  <div class="text-muted">Bu web sitesinin hakları Necibe Güner'e aittir.</div>
+                </div>
+              </div>
+            </footer>
+          </div>
+        </div>
+      
+        <!-- AJAX ve mesaj işlemleri -->
+        <script>
+          document.getElementById('kayitForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+      
+            const form = e.target;
+            const data = new FormData(form);
+      
+            fetch(form.action, {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': data.get('csrfmiddlewaretoken')
+              },
+              body: data
+            })
+            .then(res => res.json())
+            .then(json => {
+              alert(json.message);
+              if (json.status === 'success') {
+                form.reset();
+              }
+            })
+            .catch(err => {
+              console.error(err);
+              alert('Kayıt gönderilirken bir hata oluştu.');
+            });
+          });
+        </script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script src="js/scripts.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+        <script src="js/datatables-simple-demo.js"></script>
+        <script src="{% static 'vendor/simple-datatables/simple-datatables.min.js' %}"></script>
+        <script src="{% static 'js/scripts.js' %}"></script>
+    </body>
+</html>

@@ -1,0 +1,281 @@
+
+{% load static file_extras %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Devam Eden Başvurular -KOÜ Bilgi Sistemi</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <!-- Simple-DataTables CSS -->
+  <link href="{% static 'vendor/simple-datatables/style.min.css' %}" rel="stylesheet" />
+
+  <!-- Kendi stiliniz -->
+  <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+
+  <!-- FontAwesome (CDN kalsın) -->
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    </head>
+    <body class="sb-nav-fixed">
+      <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+          <!-- Navbar Brand-->
+          <a class="navbar-brand ps-3" href="{% url 'home' %}"> KOÜ Yönetici Paneli</a>
+          <!-- Sidebar Toggle-->
+          <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+          <!-- Navbar-->
+          <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+              <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                      <li><a class="dropdown-item" href="#!">Ayarlar</a></li>
+                      <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                      <li><hr class="dropdown-divider" /></li>
+                      <li><a class="dropdown-item" href="#!">Çıkış</a></li>
+                  </ul>
+              </li>
+          </ul>
+      </nav>
+      <div id="layoutSidenav">
+          <div id="layoutSidenav_nav">
+              <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                  <div class="sb-sidenav-menu">
+                      <div class="nav">
+                          <div class="sb-sidenav-menu-heading">Menü</div>
+                          <a class="nav-link" href="{% url 'home' %}">
+                              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                              Ana Sayfa
+                          </a>
+                          <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseBasvurular" aria-expanded="false" aria-controls="collapseBasvurular">
+                              <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                              Başvurular
+                              <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                          </a>
+                          <div class="collapse" id="collapseBasvurular" data-bs-parent="#sidenavAccordion">
+                              <nav class="sb-sidenav-menu-nested nav">
+                                  <a class="nav-link" href="tablesYeniB.html">Yeni Başvurular</a>
+                                  <a class="nav-link" href="tablesDevamB.html">Devam Eden Başvurular</a>
+                                  <a class="nav-link" href="tablesBitenB.html">Biten Başvurular</a>
+                                  <a class="nav-link" href="tablesSonuclananB.html">Sonuçlanan Başvurular</a>
+                              </nav>
+                          </div>
+                          <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                              <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                              Sistem Ayarları
+                              <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                          </a>
+                          <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                              <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
+                                  <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
+                                      Kullanıcı Ayarları
+                                      <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                                  </a>
+                                  <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                      <nav class="sb-sidenav-menu-nested nav">
+                                          <a class="nav-link" href="yeniKullanici.html">Kayıt Oluşturma</a>
+                                          <a class="nav-link" href="{% url 'kayitli_kullanicilar' %}">
+                                              <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                                              Kayıtlı Kullanıcılar
+                                          </a> 
+                                      </nav>
+                                  </div>
+                              </nav>
+                          </div>
+                          <a class="nav-link" href="tables.html">
+                              <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                              Bildirimler ve Mailler
+                          </a>
+                      </div>
+                  </div>
+                  <div class="sb-sidenav-footer">
+                      <div class="small">Giriş Yapıldı:</div>
+                      Yönetici A
+                  </div>
+              </nav>
+          </div>
+          <div id="layoutSidenav_content">
+              <main>
+                  <div class="container-fluid px-4">
+                    <h1 class="mt-4">Devam Eden Başvurular</h1>
+                    <ol class="breadcrumb mb-4">
+                      <li class="breadcrumb-item"><a href="{% url 'home' %}">Ana Sayfa</a></li>
+                      <li class="breadcrumb-item active">Devam Eden Başvurular</li>
+                    </ol>
+          
+                    <div class="card mb-4">
+                      <div class="card-body">
+                        Şu an sistemde yayınlanmakta olan ve bitiş tarihi geçmemiş ilanlar listeleniyor.
+                      </div>
+                    </div>
+          
+                    <div class="card mb-4">
+                      <div class="card-header">
+                        <i class="fas fa-table me-1"></i> Akademik Kadro Başvuruları
+                      </div>
+                      <div class="card-body">
+                        <table id="datatablesSimple" class="table table-striped">
+                          <thead>
+                            <tr>
+                              <th>Bölüm</th>
+                              <th>Pozisyon</th>
+                              <th>Açıklama</th>
+                              <th>PDF'ler</th>
+                              <th>Başlangıç</th>
+                              <th>Bitiş</th>
+                              <th>Kadro</th>
+                              <th>İşlemler</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                          {% for ilan in ilanlar %}
+                            <tr data-id="{{ ilan.pk }}">
+                              <td class="cell-bolum">{{ ilan.bolum }}</td>
+                              <td class="cell-pozisyon">{{ ilan.pozisyon }}</td>
+                              <td class="cell-aciklama">{{ ilan.aciklama|truncatechars:80 }}</td>
+                              <td>
+                                  {% if ilan.bilgilendirme_dosya %}
+                                    {% for f in ilan.bilgilendirme_dosya %}
+                                      <a href="{{ f }}" target="_blank">{{ f|filename }}</a>
+                                      {% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                  {% else %}
+                                    –
+                                  {% endif %}
+                                </td>
+                              <td class="cell-basl">{{ ilan.basl_tarih }}</td>
+                              <td class="cell-bitis">{{ ilan.bitis_tarih }}</td>
+                              <td class="cell-kadro">{{ ilan.kadro_sayi }}</td>
+                              <td>
+                                <button class="btn btn-sm btn-primary edit-btn">Düzenle</button>
+                                <button class="btn btn-sm btn-success save-btn" style="display:none;">Kaydet</button>
+                                <a href="{% url 'ilan_sil' ilan.pk %}" class="btn btn-sm btn-danger delete-btn">Sil</a>
+                              </td>
+                            </tr>
+                          {% empty %}
+                            <tr>
+                              <td colspan="8" class="text-center">Devam eden ilan yok.</td>
+                            </tr>
+                          {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </main>
+              <footer class="py-4 bg-light mt-auto">
+                  <div class="container-fluid px-4">
+                      <div class="d-flex align-items-center justify-content-between small">
+                          <div class="text-muted">Bu web sitesinin hakları Necibe Güner'e aittir.</div>
+                      </div>
+                  </div>
+              </footer>
+          </div>
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+      <script src="js/scripts.js"></script>
+      <script>
+          document.querySelectorAll(".edit-btn, .save-btn, .delete-btn")
+            .forEach(btn => {
+              btn.addEventListener("click", function(e) {
+                if (!confirm("Emin misiniz?")) {
+                  e.preventDefault();
+                }
+              });
+            });
+        </script>
+      <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+      <script src="js/datatables-simple-demo.js"></script>
+         <!-- Simple-DataTables JS -->
+      <script src="{% static 'vendor/simple-datatables/simple-datatables.min.js' %}"></script>
+
+       <!-- Kendi script’iniz -->
+      <script src="{% static 'js/scripts.js' %}"></script>
+      <script>
+          // CSRF token için cookie okuma fonksiyonu
+          function getCookie(name) {
+              let v = document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+              return v ? v.pop() : '';
+          }
+          const csrftoken = getCookie('csrftoken');
+      
+          // Silme onayı
+          document.querySelectorAll(".delete-btn").forEach(btn => {
+            btn.addEventListener("click", function(e) {
+              if (!confirm("Bu ilanı silmek istediğinize emin misiniz?")) e.preventDefault();
+            });
+          });
+      
+          // Inline Düzenleme
+          document.querySelectorAll(".edit-btn").forEach(btn => {
+            btn.addEventListener("click", function() {
+              const tr = btn.closest("tr");
+              tr.querySelector(".edit-btn").style.display = 'none';
+              tr.querySelector(".save-btn").style.display = 'inline-block';
+      
+              // Hangi hücreler düzenlenebilir?
+              const cfg = [
+                {cls:'cell-bolum',   type:'text',     name:'bolum'},
+                {cls:'cell-pozisyon', type:'text',     name:'pozisyon'},
+                {cls:'cell-aciklama', type:'textarea', name:'aciklama'},
+                {cls:'cell-basl',     type:'date',     name:'basl_tarih'},
+                {cls:'cell-bitis',    type:'date',     name:'bitis_tarih'},
+                {cls:'cell-kadro',    type:'number',   name:'kadro_sayi'}
+              ];
+      
+              cfg.forEach(col => {
+                const td = tr.querySelector('.' + col.cls);
+                const val = td.textContent.trim();
+                td.innerHTML = '';
+                const inp = document.createElement(col.type==='textarea'?'textarea':'input');
+                inp.name = col.name;
+                if (col.type!=='textarea') inp.type = col.type;
+                inp.value = val;
+                inp.classList.add('form-control');
+                td.appendChild(inp);
+              });
+            });
+          });
+      
+          document.querySelectorAll(".save-btn").forEach(btn => {
+          btn.addEventListener("click", function() {
+      const tr     = btn.closest("tr");
+      const ilanId = tr.dataset.id;
+      const url    = `/ilan/${ilanId}/edit/`;
+      const fd     = new FormData();
+
+      tr.querySelectorAll('input, textarea').forEach(inp => {
+       fd.append(inp.name, inp.value);
+      });
+
+       fetch(url, {
+       method: 'POST',
+        headers: {
+       'X-CSRFToken': csrftoken
+        },
+        credentials: 'same-origin',
+        body: fd
+      })
+      .then(res => {
+       if (!res.ok) throw 'Sunucudan hata döndü';
+       return res.json();
+      })
+      .then(data => {
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert('Kayıt sırasında problem: ' + (data.error||''));
+        }
+      })
+      .catch(err => {
+        console.error(err);
+            alert('Güncelleme sırasında hata oluştu.');
+           });
+          });
+          });
+      </script>
+  </body>
+</html>

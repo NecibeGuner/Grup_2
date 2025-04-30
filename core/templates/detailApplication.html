@@ -1,0 +1,2087 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>Genel Puanlama Bilgileri (Tam Form)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* Temel sayfa stili */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        /* Tablo stili */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #000; /* Koyu kenarlık */
+        }
+        th, td {
+            padding: 8px;
+            vertical-align: top;
+        }
+        th {
+            text-align: center;
+            background-color: #f2f2f2; /* Hafif gri arka plan */
+        }
+        /* Geniş input alanları */
+        input[type="text"],
+        input[type="date"],
+        input[type="number"] {
+            width: 95%;
+            box-sizing: border-box;
+        }
+        /* Checkbox düzeni */
+        label {
+            margin-right: 10px;
+        }
+        /* PDF'e dönüştürme butonu */
+        .convert-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Genel Puanlama Bilgileri</h1>
+    <form id="puanlamaForm">
+        <!-- 1) GENEL BİLGİLER -->
+        <table>
+            <tr><th colspan="4">GENEL PUANLAMA BİLGİLERİ</th></tr>
+            <tr>
+              <td><strong>Adı Soyadı (Unvan):</strong></td>
+              <td>
+                <input type="text" name="adSoyad"
+                       value="{{ kisi.ad_soyad }} ({{ kisi.akademik_unvan }})" />
+              </td>
+              <td><strong>Tarih:</strong></td>
+              <td>
+                <input type="date" name="tarih"
+                       value="{{ basvuru.basvuru_tarihi }}" />
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Bulunduğu Kurum:</strong></td>
+              <td>
+                <input type="text" name="kurum"
+                       value="{{ ilan.bolum }}" />
+              </td>
+              <td><strong>Başvurduğu Akademik Kadro:</strong></td>
+              <td>
+                <input type="text" name="kadro"
+                       value="{{ basvuru.basvurulan_kadro }}" />
+              </td>
+            </tr>
+          </table>
+
+        <!-- 2) A. MAKALELER -->
+        <table>
+            <tr>
+              <th colspan="4">A. MAKALELER</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th>Yazarlar, Makale …</th>
+              <th>Puan Hesabı</th>
+              <th>Nihai Puan</th>
+            </tr>
+            <tr>
+              <td>1) Q1 dergilerde makale</td>
+              <td><!-- varsa makale listesi buraya --></td>
+              <td>
+                <input type="text" name="q1_puanHesabi"
+                       value="{{ basvuru.makaleler_set.filter(makale_turu='Q1').count }} x 20" />
+              </td>
+              <td>
+                <input type="number" name="q1_puan"
+                       value="{{ basvuru.makaleler_set.filter(makale_turu='Q1').count|mul:20 }}" />
+              </td>
+            </tr>
+            <!-- diğer satırlar için aynı mantık -->
+          </table>
+
+        <!-- A Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align: right; width:75%;"><strong>Asgari Koşula Dahil Toplam Puan (A Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumA_asgariPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td style="text-align: right; width:75%;"><strong>Toplam Puan (A Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumA_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 3) B. BİLİMSEL TOPLANTI FAALİYETLERİ -->
+        <table>
+            <tr>
+                <th colspan="4">B. BİLİMSEL TOPLANTI FAALİYETLERİ</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Yazar/Yazarlar, Bildiri Adı, Konferansın Adı, Yapıldığı Yer, Sayfa Sayıları ve Tarih</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1) Uluslararası bilimsel toplantılarda sözlü olarak sunulan, tam metni matbu veya elektronik olarak bildiri kitapçığında yayımlanmış çalışmalar</td>
+                <td><!-- Bildiri bilgileri --></td>
+                <td><input type="text" name="b1_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>2) Uluslararası bilimsel toplantılarda sözlü olarak sunulan, özet metni matbu veya elektronik olarak bildiri kitapçığında yayımlanmış çalışmalar</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b2_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>3) Uluslararası bilimsel toplantılarda poster olarak sunulan çalışmalar</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b3_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>4) Ulusal bilimsel toplantılarda sözlü olarak sunulan tam metni matbu veya elektronik olarak bildiri kitapçığında yayımlanmış çalışmalar</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b4_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b4_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>5) Ulusal bilimsel toplantılarda sözlü olarak sunulan, özet metni matbu veya elektronik olarak bildiri kitapçığında yayımlanmış çalışmalar</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b5_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b5_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>6) Ulusal bilimsel toplantılarda poster olarak sunulan çalışmalar</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b6_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>7) Uluslararası bir kongre, konferans veya sempozyumda organizasyon veya yürütme komitesinde düzenleme kurulu üyeliği veya bilim kurulu üyeliği yapmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b7_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b7_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>8) Ulusal bir kongre, konferans veya sempozyumda organizasyon veya yürütme komitesinde düzenleme kurulu üyeliği veya bilim kurulu üyeliği yapmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b7_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b7_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>9) Uluslararası konferanslarda, bilimsel toplantı, seminerlerde davetli konuşmacı olarak yer almak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b7_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b7_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>10) Ulusal konferanslarda, bilimsel toplantı, seminerlerde davetli konuşmacı olarak yer almak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b7_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b7_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>11) Uluslararası veya ulusal çeşitli kurumlarla işbirliği içinde atölye, çalıştay, yaz okulu organize ederek gerçekleştirmek</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b7_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b7_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>12) Uluslararası veya ulusal çeşitli kurumlarla işbirliği içinde atölye, çalıştay, panel, seminer, yaz okulunda konuşmacı veya panelist olarak görev almak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="b7_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="b7_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- B Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Asgari Koşula Dahil Toplam Puan (B Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumB_asgariPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Toplam Puan (B Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumB_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 4) C. KİTAPLAR -->
+        <table>
+            <tr>
+                <th colspan="4">C. KİTAPLAR (Yabancı dildeki kitapların puanları 1.5 ile çarpıldıktan sonra hesaplama kullanılır)</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Yazar/Yazarlar, Kitap Adı, Yayınevi, Baskı sayısı yayımlandığı Yer, Yıl</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1) Uluslararası yayınevleri tarafından yayımlanmış özgün kitap</td>
+                <td><!-- Kitap bilgileri --></td>
+                <td><input type="text" name="c1_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="c1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>2) Uluslararası yayınevleri tarafından yayımlanmış özgün kitap editörlüğü, bölüm yazarlığı (Her bir kitap için maksimum 2 bölüm yazarlığı)</td>
+                <td><!-- --></td>
+                <td><input type="text" name="c2_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="c2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>3) Uluslararası yayımlanan ansiklopedi konusu/maddesi (en fazla 3 madde)</td>
+                <td><!-- --></td>
+                <td><input type="text" name="c3_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="c3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>4) Ulusal yayınevleri tarafından yayımlanmış özgün kitap</td>
+                <td><!-- --></td>
+                <td><input type="text" name="c4_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="c4_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>5) Ulusal yayınevleri tarafından yayımlanmış özgün kitap editörlüğü, bölüm yazarlığı (Her bir kitap için maksimum 2 bölüm yazarlığı)</td>
+                <td><!-- --></td>
+                <td><input type="text" name="c5_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="c5_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>6) Tam kitap çevirisi (Yayınevleri için ilgili ÜAK kriterleri geçerlidir)</td>
+                <td><!-- --></td>
+                <td><input type="text" name="c5_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="c5_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>7) Çeviri kitap editörlüğü, kitap bölümü çevirisi (Yayınevleri için ilgili ÜAK kriterleri geçerlidir) (Her bir kitap için maksimum 2 bölüm çevirisi)</td>
+                <td><!-- --></td>
+                <td><input type="text" name="c5_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="c5_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>8) Alanında ulusal yayımlanan ansiklopedi konusu/maddesi (en fazla 3 madde)</td>
+                <td><!-- --></td>
+                <td><input type="text" name="c5_puanHesabi" placeholder="(Adet x ...)" /></td>
+                <td><input type="number" name="c5_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- C Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Asgari Koşula Dahil Toplam Puan (C Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumC_asgariPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Toplam Puan (C Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumC_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 5) D. ATIFLAR -->
+        <table>
+            <tr>
+                <th colspan="4">D. ATIFLAR (Atıf yapan eserlerin belgelenmesi kaydıyla, bu yönetmeliğin Temel İlkeler bölümündeki atıflara ilişkin açıklamalar dikkate alınır)</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Atıfın Yapıldığı Eser, Atıf Sayısı</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1) SCI-E, SSCI ve AHCI tarafından taranan dergilerde; Uluslararası yayınevleri tarafından yayımlanmış kitaplarda yayımlanan ve adayın yazar olarak yer almadığı yayınlardan her birinde, metin içindeki atıf sayısına bakılmaksızın adayın atıf yapılan her eseri için</td>
+                <td><!-- --></td>
+                <td><input type="text" name="d1_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="d1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>2) E-SCI tarafından taranan dergilerde ve adayın yazar olarak yer almadığı yayınlardan her birinde, metin içindeki atıf sayısına bakılmaksızın adayın atıf yapılan her eseri için</td>
+                <td><!-- --></td>
+                <td><input type="text" name="d2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="d2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>3) SCI-E, SSCI, AHCI, E-SCI dışındaki diğer uluslararası indeksler tarafından taranan dergilerde; Uluslararası yayınevleri tarafından yayımlanmış kitaplarda bölüm yazarı olarak yayımlanan ve adayın yazar olarak yer almadığı yayınlardan her birinde, metin içindeki atıf sayısına bakılmaksızın adayın atıf yapılan her eseri için</td>
+                <td><!-- --></td>
+                <td><input type="text" name="d3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="d3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>4) Ulusal hakemli dergilerde; Ulusal yayınevleri tarafından yayımlanmış kitaplarda yayımlanan ve adayın yazar olarak yer almadığı yayınlardan her birinde, metin içindeki atıf sayısına bakılmaksızın adayın atıf yapılan her eseri için</td>
+                <td><!-- --></td>
+                <td><input type="text" name="d3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="d3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>5) Güzel sanatlardaki eserlerin uluslararası kaynak veya yayın organlarında yer alması veya gösterime ya da dinletime girmesi</td>
+                <td><!-- --></td>
+                <td><input type="text" name="d3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="d3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>6) Güzel sanatlardaki eserlerin ulusal kaynak veya yayın organlarında yer alması veya gösterime ya da dinletime girmesi</td>
+                <td><!-- --></td>
+                <td><input type="text" name="d3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="d3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- D Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Asgari Koşula Dahil Toplam Puan (D Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumD_asgariPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Toplam Puan (D Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumD_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 6) E. EĞİTİM ÖĞRETİM FAALİYETLERİ -->
+        <table>
+            <tr>
+                <th colspan="4">E. EĞİTİM ÖĞRETİM FAALİYETLERİ (Son üç yılda verdiği dersler, Azami 50 puan, doktora unvanından sonra)</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Dersin Adı, Programın Adı, Dönemi, Yılı</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1) Ön lisans / lisans dersleri</td>
+                <td><!-- Ders bilgileri --></td>
+                <td><input type="text" name="e1_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="e1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>2) Önlisans/lisans dersleri (Yabancı dilde)</td>
+                <td><!-- --></td>
+                <td><input type="text" name="e2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="e2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>3) Lisansüstü dersleri</td>
+                <td><!-- --></td>
+                <td><input type="text" name="e3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="e3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>4) Lisansüstü dersleri (Yabancı dilde)</td>
+                <td><!-- --></td>
+                <td><input type="text" name="e4_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="e4_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- E Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Asgari Koşula Dahil Toplam Puan (E Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumE_asgariPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Toplam Puan (E Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumE_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+<!-- 6) F. EĞİTİM ÖĞRETİM FAALİYETLERİ -->
+<table>
+    <tr>
+        <th colspan="4">F. TEZ YÖNETİCİLİĞİ (Tamamlanmış olması kaydıyla)</th>
+    </tr>
+    <tr>
+        <th style="width: 30%;"></th>
+        <th style="width: 40%;">Öğrenci adı, Tezin Adı, Enstitüsü, Yılı</th>
+        <th style="width: 15%;">Puan Hesabı</th>
+        <th style="width: 15%;">Nihai Puan</th>
+    </tr>
+    <tr>
+        <td>1) Doktora/Sanatta Yeterlik veya Tıp/Diş Hekimliğinde Uzmanlık tez yönetimi</td>
+        <td><!-- Ders bilgileri --></td>
+        <td><input type="text" name="e1_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+        <td><input type="number" name="e1_nihaiPuan" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>2) Yüksek Lisans Tez Yönetimi</td>
+        <td><!-- --></td>
+        <td><input type="text" name="e4_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+        <td><input type="number" name="e4_nihaiPuan" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>3) Doktora/Sanatta Yeterlik (Eş Danışman)</td>
+        <td><!-- --></td>
+        <td><input type="text" name="e2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+        <td><input type="number" name="e2_nihaiPuan" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>4) Yüksek Lisans/Sanatta Yeterlik Tez Yönetimi (Eş Danışman)</td>
+        <td><!-- --></td>
+        <td><input type="text" name="e3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+        <td><input type="number" name="e3_nihaiPuan" step="0.01" placeholder="0" /></td>
+    </tr>
+</table>
+
+<!-- E Bölümü Toplam Puan -->
+<table>
+    <tr>
+        <td style="text-align:right; width:75%;"><strong>Asgari Koşula Dahil Toplam Puan (F Bölümü)</strong></td>
+        <td style="width:25%;"><input type="number" name="bolumE_asgariPuan" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td style="text-align:right; width:75%;"><strong>Toplam Puan (E Bölümü)</strong></td>
+        <td style="width:25%;"><input type="number" name="bolumE_toplamPuan" step="0.01" placeholder="0" /></td>
+    </tr>
+</table>
+
+        <!-- 7) G. PATENTLER -->
+        <table>
+            <tr>
+                <th colspan="4">G. PATENTLER</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Patent Adı, Yılı</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1) Lisanslanan Uluslararası Patent</td>
+                <td><!-- --></td>
+                <td><input type="text" name="g1_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="g1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>2) Tescillenmiş Uluslararası Patent</td>
+                <td><!-- --></td>
+                <td><input type="text" name="g2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="g2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>3) Uluslararası Patent Başvurusu</td>
+                <td><!-- --></td>
+                <td><input type="text" name="g3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="g3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>4) Lisanslanan Ulusal Patent</td>
+                <td><!-- --></td>
+                <td><input type="text" name="g4_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="g4_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>5) Tescillenmiş Ulusal Patent</td>
+                <td><!-- --></td>
+                <td><input type="text" name="g5_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="g5_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>6) Ulusal Patent Başvurusu</td>
+                <td><!-- --></td>
+                <td><input type="text" name="g6_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="g6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>7) Lisanslanan Faydalı Model, Endüstriyel Tasarım, Marka</td>
+                <td><!-- --></td>
+                <td><input type="text" name="g7_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="g7_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>8) Faydalı Model ve Endüstriyel Tasarım</td>
+                <td><!-- --></td>
+                <td><input type="text" name="g8_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="g8_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- G Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Bölüm G Toplam Puan</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumG_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 8) H. ARAŞTIRMA PROJELERİ -->
+        <table>
+            <tr>
+                <th colspan="4">H. ARAŞTIRMA PROJELERİ (Tamamlanmış veya devam ediyor olmak koşuluyla, projenin en az dokuz ay süreli olduğu ve hakem değerlendirilmesinden geçtiği belgelenir ve projenin bütçesi, kabul edildiği yıldaki en son açıklanan memur taban aylık katsayısının en az 4000 katı olmalıdır.)</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Projenin Adı, Proje Numarası, Projenin Yürütüldüğü Kurumun Adı, Yılı</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1) AB çerçeve programı/NSF/ERC bilimsel araştırma projesinde koordinatör/alt koordinatör olmak</td>
+                <td><!-- Proje bilgileri --></td>
+                <td><input type="text" name="h1_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>2) AB çerçeve programı/NSF/ERC bilimsel araştırma projesinde yürütücü olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>3) AB çerçeve programı/NSF/ERC bilimsel araştırma projesinde araştırmacı olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h3_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>4) AB Çerçeve Programı/NSF/ERC bilimsel araştırma projeleri dışındaki uluslararası destekli bilimsel araştırma projelerinde (derleme ve rapor hazırlama çalışmaları hariç) koordinatör/alt koordinatör olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h4_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h4_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>5) AB Çerçeve Programı/NSF/ERC bilimsel araştırma projeleri dışındaki uluslararası destekli bilimsel araştırma projelerinde (derleme ve rapor hazırlama çalışmaları hariç) yürütücü olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h5_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h5_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>6) AB Çerçeve Programı/NSF/ERC bilimsel araştırma projeleri dışındaki uluslararası destekli bilimsel araştırma projelerinde (derleme ve rapor hazırlama çalışmaları hariç) araştırmacı olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>7) AB Çerçeve Programı/NSF/ERC bilimsel araştırma projeleri dışındaki uluslararası destekli bilimsel araştırma projelerinde (derleme ve rapor hazırlama çalışmaları hariç) danışman olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>8) TÜBİTAK ARGE (ARDEB, TEYDEB) ve TÜSEB projelerinde yürütücü olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>9) Diğer TÜBİTAK projelerinde yürütücü olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>10) TÜBİTAK dışındaki diğer kamu kurumlarıyla yapılan bilimsel araştırma projelerinde yürütücü olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>11) Sanayi kuruluşları ile yapılan Ar-Ge projelerinde yürütücü olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>12) Diğer özel kuruluşlar ile yapılan Ar-Ge projelerinde yürütücü olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>13) TÜBİTAK ARGE (ARDEB, TEYDEB) ve TÜSEB projelerinde araştırmacı olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>14) Diğer TÜBİTAK projelerinde araştırmacı olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>15) TÜBİTAK dışındaki diğer kamu kurumlarıyla yapılan bilimsel araştırma projelerinde araştırmacı olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>16) Sanayi kuruluşları ile yapılan bilimsel araştırma projelerinde araştırmacı olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>17) Diğer özel kuruluşlar ile yapılan bilimsel araştırma projelerinde araştırmacı olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>18) TÜBİTAK ARGE (ARDEB, TEYDEB) ve TÜSEB projelerinde danışman olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>19) Diğer TÜBİTAK projelerinde danışman olmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>20) TÜBİTAK dışındaki diğer kamu kurumlarıyla yapılan bilimsel araştırma projelerinde danışman olmak
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    21) Sanayi kuruluşları ile yapılan Ar-Ge projelerinde danışman olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    22) Diğer özel kuruluşlar ile yapılan Ar-Ge projelerinde danışman olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    23) Üniversitelerin bilimsel araştırma projeleri (BAP) koordinatörlükleri destekli araştırma projelerinde (derleme ve rapor hazırlama çalışmaları hariç) yürütücü olmak (Hızlı destek, Altyapı, Lab. ve lisansüstü tez projeleri hariç)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    24) Üniversitelerin bilimsel araştırma projeleri (BAP) koordinatörlükleri destekli araştırma projelerinde araştırmacı olmak (Hızlı destek, Altyapı, Lab. ve lisansüstü tez projeleri hariç)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    25) Üniversitelerin bilimsel araştırma projeleri (BAP) koordinatörlükleri destekli araştırma projelerinde danışman olmak (Hızlı destek, Altyapı, Lab. ve lisansüstü tez projeleri hariç)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    26) En az dört aylık yurtdışı araştırma çalışmasında bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    27) En az dört aylık yurtiçi araştırma çalışmasında bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    28) TÜBİTAK 2209-A, 2209-B, 2242 projelerinde danışman olmak (En fazla 100 puan alınabilir. Kabul edildiği yıldaki en son açıklanan memur taban aylık katsayısı koşulu bu madde için geçerli değildir)</td>
+            </td>
+                <td><!-- --></td>
+                <td><input type="text" name="h6_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="h6_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+
+        </table>
+
+        <!-- H Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Asgari Koşula Dahil Toplam Puan (H Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumH_asgariPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Toplam Puan (H Bölümü)</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumH_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 9) I. ULUSLARARASI / ULUSAL DİĞER FAALİYETLER -->
+        <table>
+            <tr>
+                <th colspan="4">I. EDİTÖRLÜK, YAYIN KURULU ÜYELİĞİ VE HAKEMLİK FAALİYETLERİ</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;"> Dergi, Yıl</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1) SCI-E, SSCI, AHCI veya E-SCI kapsamındaki dergilerde baş editörlük görevinde bulunmak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="i1_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>2) SCI-E, SSCI, AHCI veya E-SCI kapsamındaki dergilerde yardımcı/ortak editörlük görevinde bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>3) SCI-E, SSCI, AHCI veya E-SCI kapsamındaki dergilerde asistan editörlük görevinde bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td> 4) SCI-E, SSCI, AHCI veya E-SCI kapsamındaki dergilerde yayın kurulu üyeliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td> 5) SCI-E, SSCI, AHCI veya E-SCI kapsamı dışındaki uluslararası diğer indeksler tarafından taranan dergilerde baş editörlük görevinde bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>6) SCI-E, SSCI, AHCI veya E-SCI kapsamı dışındaki uluslararası diğer indeksler tarafından taranan dergilerde yardımcı/ortak editörlük görevinde bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>7) SCI-E, SSCI, AHCI veya E-SCI kapsamı dışındaki uluslararası diğer indeksler tarafından taranan dergilerde asistan editörlük görevinde bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>8) SCI-E, SSCI, AHCI veya E-SCI kapsamı dışındaki uluslararası diğer indeksler tarafından taranan dergilerde yayın kurulu üyeliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>9) ULAKBİM tarafından taranan dergilerde baş editörlük görevi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>10) ULAKBİM tarafından taranan dergilerde yayın kurulu üyeliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>11) SCI-E, SSCI veya AHCI kapsamındaki dergilerde tamamlanmış hakemlik faaliyeti (her bir hakemlik faaliyeti başına)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>12) SCI-E, SSCI veya AHCI kapsamı dışındaki uluslararası diğer indeksler tarafından dergilerde tamamlanmış hakemlik faaliyeti (her bir hakemlik faaliyeti başına)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>13) ULAKBİM tarafından taranan dergilerde hakemlik faaliyeti (her bir hakemlik faaliyeti başına)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="i2_puanHesabi" placeholder="(Adet x katsayı)" /></td>
+                <td><input type="number" name="i2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- I Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Bölüm I Toplam Puan</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumI_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 10) J. ÖDÜLLER -->
+        <table>
+            <tr>
+                <th colspan="4">J. ÖDÜLLER</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Ödülün Veren Kurul/Kurumun Adı, Yılı</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1) Sürekli ve Periyodik olarak Jürili uluslararası bilim ve sanat ödülleri
+                    </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j1_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    2) TÜBİTAK tarafından verilen Bilim, Özel ve Hizmet Ödülleri
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    3) TÜBA tarafından verilen Akademi Ödülleri
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    4) TÜBİTAK tarafından verilen Teşvik Ödülü (Yayın teşvik ödülü hariç)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    5) TÜBA tarafından verilen GEBİP ve TESEP ödülleri
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    6) Sürekli ve Periyodik olarak Jürili ulusal bilim ve sanat ödülleri
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                    
+                    7) Sürekli ve periyodik olarak verilen ve bir jüri değerlendirmesine tabi olmayan uluslararası/ulusal ödüller
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>                   
+                    8) Uluslararası hakemli yarışmalarda birincilik derecesi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    9) Uluslararası hakemli yarışmalarda ikincilik derecesi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    10) Uluslararası hakemli yarışmalarda üçüncülük derecesi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    11) Ulusal hakemli yarışmalarda birincilik derecesi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    12) Ulusal hakemli yarışmalarda ikincilik derecesi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    13) Ulusal hakemli yarışmalarda üçüncülük ödül derecesi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    14) Uluslararası bilimsel toplantılarda alınan ödüller
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    15) Ulusal bilimsel toplantılarda alınan ödüller
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    16) Sanat, tasarım ve mimarlık alanlarında Uluslararası hakemli yarışmalarda alınan ödüller
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    17) Sanat, tasarım ve mimarlık alanlarında Ulusal hakemli yarışmalarda alınan ödüller
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    18) KOU Kurumsal ödülleri ( üniversite genelinde ilgili alanda (makale, patent, proje, vb dereceye girenler)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    19) Kitap veya makale gibi bilimsel eserlere atfedilen ödüller
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- J Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Bölüm J Toplam Puan</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumJ_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 11) K. İDARİ GÖREVLER VE ÜNİVERSİTEYE KATKI FAALİYETLERİ -->
+        <table>
+            <tr>
+                <th colspan="4">K. İDARİ GÖREVLER VE ÜNİVERSİTEYE KATKI FAALİYETLERİ (İdari görevlerde vekaleten de olsa en az 6 ay görev yapmış olmak, aynı anda birden fazla idari görevi olanlar için en yüksek puan dikkate alınır ve normal süresi dolup yeniden atamalar ayrıca puanlanır. Bu kısımda en fazla 50 puan dikkate alınır)</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Görev Birimi , Yılı</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>1)Dekan/Enstitü/Yüksekokul/MYO/Merkez Müdürü</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k1_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    2) Enstitü Müdür Yrd. / Dekan Yrd. / Yüksekokul Müdür Yrd. / MYO Müdür Yrd. / Merkez Müdürü Yrd./Bölüm Başkanı</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    3) Bölüm Başkan Yrd. / Anabilim Dalı Başkanı</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    4) Rektörlükçe görevlendirilen Koordinatörlük</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k4_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k4_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    
+                    5) Rektörlükçe görevlendirilen Koordinatör Yardımcıları</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    
+                    6) Rektörlükçe görevlendirilen üniversite düzeyinde Komisyon/Kurul üyelikleri</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    
+                    7) Dekanlık/Y.O. Müdürlüğü/MYO Müdürlüğü /Konservatuvar Müdürlüğü tarafından görevlendirilen Komisyon/Kurul üyelikleri</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    8) Bölüm Başkanlıkları tarafından görevlendirilen Komisyon/Kurul üyelikleri</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    9)Rektörlük/Dekanlık/Y.O. Müdürlüğü/MYO Müdürlüğü /Konservatuvar Müdürlüğü/ Bölüm Başkanlığı görevlendirmeleriyle kurum içi ve dışı eğitim, işbirliği vb konularda katkı sağlamak
+                    </td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    10) Uluslararası nitelikteki bilimsel ve mesleki kurum/kuruluşların yönetimlerinde, kurullarında, komisyon veya komitelerinde görev almak
+                    </td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    11) Ulusal nitelikteki bilimsel ve mesleki kurum/kuruluşların yönetimlerinde, kurullarında, komisyon veya komitelerinde görev almak
+                    </td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    12) Yerel nitelikteki bilimsel ve mesleki kurum/kuruluşların yönetimlerinde, kurullarında, komisyon veya komitelerinde görev almak</td>
+                <td><!-- --></td>
+                <td><input type="text" name="k3_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="k3_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- K Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Bölüm K Toplam Puan</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumK_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        <!-- 12)L. GÜZEL SANATLAR FAALİYETLERİ (Konservatuvar dahil) -->
+        <table>
+            <tr>
+                <th colspan="4">L. GÜZEL SANATLAR FAALİYETLERİ (Konservatuvar dahil)</th>
+            </tr>
+            <tr>
+                <th style="width: 30%;"></th>
+                <th style="width: 40%;">Faaliyet Adı, Yılı</th>
+                <th style="width: 15%;">Puan Hesabı</th>
+                <th style="width: 15%;">Nihai Puan</th>
+            </tr>
+            <tr>
+                <td>
+                    1) Özgün sanat eserlerinin, tasarım veya yorum çalışmalarının yurt dışında sanat, eğitim ve kültür kurumlarınca satın alınması veya bu eser(ler) için telif ödenmesi (Kurumlar bazında puanlama yapılır)
+                </td>
+                <td><!-- Görev bilgileri --></td>
+                <td><input type="text" name="l1_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="l1_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    2) Özgün sanat eserlerinin, tasarım veya yorum çalışmalarının yurt içinde sanat, eğitim ve kültür kurumlarınca satın alınması veya bu eser(ler) için telif ödenmesi (Kurumlar bazında puanlama yapılır)
+                                   </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    3) Yerel Yönetimler veya Özel Kuruluşların desteklediği kamusal alanda kalıcı olarak gerçekleştirilen sanat projeleri (Heykel, Duvar Resmi / Graffiti, Enstalasyon vb.) (Kurumlar bazında puanlama yapılır)
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    4) Galerilerde, müzelerde, sanat ve kültür merkezlerinde gerçekleştirilen Küratörlük etkinlikleri (En fazla iki kez puanlanır)
+                   
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    5) Özgün sanat eserleri, tasarımlar ya da yorum/icra çalışmalarıyla yurtdışında uluslararası jürili kişisel etkinlikte (sergi, bienal, sempozyum, trienal, gösteri, kareografi, performans, resital, dinleti, konser, kompozisyon, orkestra şefliği, festival, gösterim) bizzat katılım sağlayarak bulunmak. Her bir etkinlik için;
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    6) Özgün sanat eserleri, tasarımlar ya da yorum/icra çalışmalarıyla yurtiçinde jürili kişisel etkinlikte (sergi, bienal, sempozyum, trienal, gösteri, kareografi, performans, resital, dinleti, konser, kompozisyon, orkestra şefliği, festival, gösterim) bizzat katılım sağlayarak bulunmak. Her bir etkinlik için;
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    7) Özgün sanat eserleri, tasarımlar ya da yorum/icra çalışmalarıyla yurtdışında uluslararası jürili karma-ortak etkinlikte (sergi, bienal, sempozyum, trienal, gösteri, kareografi, performans, resital, dinleti, konser, kompozisyon, orkestra şefliği, festival, gösterim) bizzat katılım sağlayarak bulunmak. Her bir etkinlik için;
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    8) Özgün sanat eserleri, tasarımlar ya da yorum/icra çalışmalarıyla yurtiçinde ulusal jürili karma-ortak etkinlikte (sergi, bienal, sempozyum, trienal, gösteri, kareografi, performans, resital, dinleti, konser, kompozisyon, orkestra şefliği, festival, gösterim) bizzat katılım sağlayarak bulunmak. Her bir etkinlik için;
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    9) Uluslararası çalıştay/workshop (atölye çalışması)/uygulamalı sempozyum/yarışma/festival/şenlikte yöneticilik veya yürütücülük
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    
+                    10) Ulusal çalıştay/workshop (atölye çalışması)/uygulamalı sempozyum/yarışma/festival/şenlikte yöneticilik veya yürütücülük
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    11) Uluslararası çalıştay/workshop (atölye çalışması)/uygulamalı sempozyum/yarışma/festival/şenlikte araştırmacılık/kurul üyeliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    12) Ulusal çalıştay/workshop (atölye çalışması)/uygulamalı sempozyum/yarışma/festival/şenlikte araştırmacılık/kurul üyeliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    
+                    13) Uluslararası yarışmalarda / festivallerde / şenliklerde jüri üyeliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    14) Ulusal yarışmalarda/festivallerde/şenliklerde jüri üyeliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    15) Üretilen eserlerin uluslararası haber veya yayın organlarında yer alması veya gösterime ya da dinletime girmesi (her bir etkinlik için ayrı puanlanır ve her bir etkinlik için 5 haber ile sınırlıdır)
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>16) Üretilen eserlerin ulusal haber veya yayın organlarında yer alması veya gösterime ya da dinletime girmesi (her bir etkinlik için ayrı puanlanır ve her bir etkinlik için 5 haber ile sınırlıdır)     
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    17) Uluslararası resital icra etmek
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    18) Uluslararası Konserlerde, Orkestra, Koro, Geleneksel Topluluklar konserinde solist icracı olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    19) Uluslararası Konserlerde, Orkestra, Koro, Geleneksel Topluluklar konserinde karma icracı olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    20) Uluslararası Konserlerde, Orkestra Şefliği, Müzik Topluluğu Şefliği ve Koro Şefliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    21) Uluslararası Konserlerde, Oda Müziği Konserinde icracı olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    22) Uluslararası Konserlerde, Orkestra Konserinde Grup Şefi olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    23) Uluslararası Konserlerde, Orkestra Konserinde Grup Üyesi olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    24) Uluslararası Konserlerde, Resital veya koro konserinde eşlikçi olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    25) Uluslararası Konserlerde, Konser yönetmenliği / dinleti koordinatörlüğü
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    26) Ulusal resital icra etmek.
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    27) Ulusal Konserlerde, Orkestra veya koro konserinde icracı olarak bireysel dinletide bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    28) Ulusal Konserlerde, Orkestra veya koro konserinde icracı olarak karma dinletide bulunmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    29) Ulusal Konserlerde, Orkestra Şefliği, Müzik Topluluğu Şefliği ve Koro Şefliği
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    30) Ulusal Konserlerde, Oda Müziği Konserinde icracı olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    31) Ulusal Konserlerde, Orkestra Konserinde Grup Şefi olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    32) Ulusal Konserlerde, Orkestra Konserinde Grup Üyesi olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    33) Ulusal Konserlerde, Resital veya koro konserinde eşlikçi olarak yer almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    34) Ulusal Konserlerde, Konser yönetmenliği / dinleti koordinatörlüğü
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    35) Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, icracı, besteci, orkestra şefi, müzik topluluğu şefi veya koro şefi olarak bireysel ses yayını 
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    36) Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, icracı, besteci, orkestra şefi, müzik topluluğu şefi veya koro şefi olarak karma ses yayını
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    37) Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, Genel Sanat Yönetmeni/Müzik yönetmeni olarak ses yayını hazırlamak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    38) Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği - Program Hazırlamak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    39) Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği Katılımcılığı - Bireysel
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    40) Uluslararası sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği Katılımcılığı - Karma
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    41) Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, İcracı, besteci, orkestra şefi, müzik topluluğu şefi veya koro şefi olarak bireysel ses yayını
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    42) Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, İcracı, besteci, orkestra şefi, müzik topluluğu şefi veya koro şefi olarak karma ses yayını
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    43) Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, Genel Sanat Yönetmeni/Müzik yönetmeni olarak ses yayını hazırlamak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    44) Ulusal sesli ve görsel etkinlikler ve sesli yayınlar, Radyo ve TV Etkinliği - Program Hazırlamak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    45) Ulusal sesli ve görsel etkinlikler ve sisli yayınlar, Radyo ve TV Etkinliği Katılımcılığı - Bireysel
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    46) Ulusal sesli ve görsel etkinlikler ve sisli yayınlar, Radyo ve TV Etkinliği Katılımcılığı - Karma
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                     47) Ulusal Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 0 – 5 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    48) Ulusal Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 5 – 10 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    49) Ulusal Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 10 – 15 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    50) Ulusal Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 15 ve üzeri dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    51) Ulusal Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 0 – 5 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    52) Ulusal Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 5 – 10 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    53) Ulusal Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 10 – 15 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    54) Ulusal Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 15 ve üzeri dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    55) Ulusal Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 0 – 5 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    56) Ulusal Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 5 – 10 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    57) Ulusal Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 10 – 15 dakikalık eser sahibi olmak
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    58) Ulusal Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 15 ve üzeri dakikalık eser sahibi olmak
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    59) Uluslararası Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 0 – 5 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    60) Uluslararası Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 5 – 10 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    61) Uluslararası Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 10 – 15 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    62) Uluslararası Orkestra İçin Bestelenmiş Eser (4’lü, 3’lü, 2’li, Oda ve Yaylı Çalgılar Orkestrası) 15 ve üzeri dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    63) Uluslararası Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 0 – 5 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    64) Uluslararası Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 5 – 10 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    65) Uluslararası Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 10 – 15 dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    66) Uluslararası Oda Müziği (Karma Oda Müziği, Vokal Müzik, Solo Çalgı Müzikleri) 15 ve üzeri dakikalık eser sahibi olmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    67) Uluslararası Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 0 – 5 dakikalık eser sahibi olmak
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    68) Uluslararası Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 5 – 10 dakikalık eser sahibi olmak
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    69) Uluslararası Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 10 – 15 dakikalık eser sahibi olmak
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    70) Uluslararası Elektronik ve Elektro – Akustik Müzikler (Çalgı, elektronik ortam ve Bilgisayar ortamında Fix Medya Müziği) 15 ve üzeri dakikalık eser sahibi olmak                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>71) Türk Müziği makamlarını kullanarak geleneksel formlar (ayin, peşrev, kâr, kârçe, ağır semâi, yürük semâi, beste, şarkı vb …) çerçevesinde oluşturulmuş kompozisyonlar. Bestelenmiş Eser Sahibi Olmak (Nota ile belgelemek koşulu ile)
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    72) Türk Müziği makamlarını kullanarak geleneksel formlar (ayin, peşrev, kâr, kârçe, ağır semâi, yürük semâi, beste, şarkı vb …) çerçevesinde oluşturulmuş kompozisyonlar. Bestelenmiş ve Seslendirilmiş Eser Sahibi Olmak (ulusal konser veya ses yayını)
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>73) Türk Müziği makamlarını kullanarak geleneksel formlar (ayin, peşrev, kâr, kârçe, ağır semâi, yürük semâi, şarkı beste vb …) çerçevesinde oluşturulmuş kompozisyonlar. Bestelenmiş ve Seslendirilmiş Eser Sahibi Olmak (uluslararası konser veya yurt dışında basılmış ses yayını)
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    74) Türk Halk Müziği alanında derleme yapmak. (TRT Müzik Dairesi Bşk. Repertuvar Kurulu tarafından onaylanmış)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    75) Türk Halk Müziği alanında derleme yapmak. (Nota ile belgelemek koşulu ile)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    76) Türk Halk Müziği alanında derlenmiş parçanın notaya alınması (TRT Müzik Dairesi Bşk. Repertuvar kurulu tarafından onaylanmış)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    77) Büyük oyun /film yönetmenliği
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    78) Kısa oyun/film yönetmenliği
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    79) Sahne oyunu / senaryo (uzun) ve dizi drama yazarlığı
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    80) Kısa sahne oyunu ve senaryo yazarlığı
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    81) Uyarlama oyun/senaryo yazmak, metin düzenlemek (uzun)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    82) Uyarlama oyun/senaryo yazmak, metin düzenlemek (kısa)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    83) Uzun oyun/senaryo/dizi drama dramaturjisi yapmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    84) Kısa oyun/senaryo dramaturjisi yapmak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    85) Uzun oyun/senaryo/ dizi drama metni çevirmek
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    86) Kısa oyun/senaryo metni çevirmek
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    87) Uzun oyunda/sinema filminde/dizi dramada başrol
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    88) Uzun oyunda/sinema filminde/dizi dramada diğer roller
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    89) Kısa oyun/filmde başrol
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    90) Kısa oyun/filmde diğer roller
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    91) Sahne oyunu/ film (uzun) ve dizi drama dekor / kostüm / ışık / ses / efekt tasarımı
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    92) Sahne oyunu/ film (uzun) ve dizi drama dekor / kostüm / ışık / ses / efekt tasarımı ekibinde görev almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    93) Sahne oyunu/ film (kısa) dekor / kostüm / ışık / ses / efekt tasarımı
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    94) Sahne oyunu/ film (kısa) dekor / kostüm / ışık / ses / efekt tasarımı ekibinde görev almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    95) Sahne oyunu/ film (uzun) ve dizi dramada makyaj, mask, kukla, butafor vb tasarımı 15
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    96) Sahne oyunu/ film (uzun) ve dizi dramada makyaj, mask, kukla, butafor vb tasarımı ekibinde görev almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    97) Sahne oyunu/ film (kısa) makyaj, mask, kukla, butafor vb tasarımı
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    98) Sahne oyunu/ film (kısa) makyaj, mask, kukla, butafor vb tasarımı ekibinde görev almak
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    99) Sanat yönetmenliği (uzun prodüksiyonlar)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    100) Sanat yönetmenliği (kısa prodüksiyonlar)
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    101) Koreografi, dramatizasyon, dinleti, performans, happening veya workshop (atölye) düzenleme/yönetme
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    102) Kongre, sempozyum, festival etkinliklerinde atölye çalışması düzenlemek
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    103) Yapıtın festival, şenlik vb. etkinliklere katılımı
+                    
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    104) Oyunun/senaryonun/filmin/sergilenmiş oyunun video kaydının vb. kamu/özel TV’ler/dijital platformlar/kurumsal kimlikli internet siteleri vb tarafından satın alınması/gösterilmesi; Devlet Tiyatroları/Şehir Tiyatroları vb tiyatroların repertuvarlarına girmesi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+            <tr>
+                <td>
+                    105) En az 10 kere gerçekleştirilmiş olan sanatsal bir yarışma/ödül organizasyonu tarafından yapıtın/sanatçının ödüllendirilmesi
+                </td>
+                <td><!-- --></td>
+                <td><input type="text" name="j2_puanHesabi" placeholder="(Örn. Adet x katsayı)" /></td>
+                <td><input type="number" name="j2_nihaiPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+
+        </table>
+
+        <!-- L Bölümü Toplam Puan -->
+        <table>
+            <tr>
+                <td style="text-align:right; width:75%;"><strong>Bölüm L Toplam Puan</strong></td>
+                <td style="width:25%;"><input type="number" name="bolumL_toplamPuan" step="0.01" placeholder="0" /></td>
+            </tr>
+        </table>
+
+        
+        <!-- ÖZET / GENEL TOPLAM TABLOSU -->
+<table>
+    <tr>
+        <th colspan="2">GENEL ÖZET TABLO</th>
+    </tr>
+    <tr>
+        <td>Adayın Asgari Yayın/Etkinlik Sayısı<br>(Tablo 1 göz önüne alınarak)</td>
+        <td>
+            <input type="number" name="asgariYayinSayisi" placeholder="0" />
+        </td>
+    </tr>
+    <tr>
+        <td>Adayın Asgari Yayın/Etkinlik Puanı<br>(İlgili bölümlerin toplamı)</td>
+        <td>
+            <input type="number" name="asgariYayinPuani" step="0.01" placeholder="0" />
+        </td>
+    </tr>
+    <!-- Her Bölüm İçin Toplam Puan Satırı -->
+    <tr>
+        <td>Bölüm A Toplam Puan</td>
+        <td><input type="number" name="bolumA_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm B Toplam Puan</td>
+        <td><input type="number" name="bolumB_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm C Toplam Puan</td>
+        <td><input type="number" name="bolumC_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm D Toplam Puan</td>
+        <td><input type="number" name="bolumD_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm E Toplam Puan</td>
+        <td><input type="number" name="bolumE_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <!-- Eğer F bölümü yoksa atlayabilirsiniz, varsa ekleyin -->
+    <!-- <tr>
+        <td>Bölüm F Toplam Puan</td>
+        <td><input type="number" name="bolumF_final" step="0.01" placeholder="0" /></td>
+    </tr> -->
+    <tr>
+        <td>Bölüm G Toplam Puan</td>
+        <td><input type="number" name="bolumG_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm H Toplam Puan</td>
+        <td><input type="number" name="bolumH_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm I Toplam Puan</td>
+        <td><input type="number" name="bolumI_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm J Toplam Puan</td>
+        <td><input type="number" name="bolumJ_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm K Toplam Puan</td>
+        <td><input type="number" name="bolumK_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td>Bölüm L Toplam Puan</td>
+        <td><input type="number" name="bolumL_final" step="0.01" placeholder="0" /></td>
+    </tr>
+    <tr>
+        <td><strong>TOPLAM PUAN</strong></td>
+        <td><input type="number" name="genelToplamPuan" step="0.01" placeholder="0" /></td>
+    </tr>
+</table>
+
+<p>
+    Gerektiği durumlarda tabloya satır eklenebilir veya tablodan satır silinebilir. <br>
+    (Örneğin, bölümlerin harf sıralaması sizin tablolarınıza uymuyorsa, satırları yeniden sıralayın.)
+</p>
+
+
+        <!-- PDF'e Çevir Butonu -->
+        <button type="button" class="convert-btn" onclick="convertToPDF()">Sayfayı PDF'e Çevir</button>
+    </form>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        function convertToPDF() {
+            // Örneğin jsPDF ve html2canvas entegrasyonu yapılarak sayfa PDF'ye dönüştürülebilir.
+            alert("PDF dönüşümü başlatılıyor...");
+        }
+    </script>
+</body>
+</html>
