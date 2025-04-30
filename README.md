@@ -52,8 +52,9 @@ Bu proje, Kocaeli Üniversitesi'nde akademik personel başvuru süreçlerini dij
 
 [Grup2_rapor.docx](https://github.com/user-attachments/files/19978678/Grup2_rapor.docx)
 
-## Lisans
+## Trello Linki
 
-MIT Lisansı
+https://trello.com/b/VlogjTpi/yazlab
+
 
 
