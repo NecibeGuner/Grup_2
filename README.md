@@ -18,7 +18,7 @@ Bu proje, Kocaeli Üniversitesi'nde akademik personel başvuru süreçlerini dij
 - Python 3.x, Django 4.2.x
 - PostgreSQL 14.x
 - AWS S3 (Belge depolama)
-- Outlook SMTP (E-posta bildirimleri)
+- Brevo SMTP (E-posta bildirimleri)
 - HTML5, CSS3, JavaScript (ES6+)
 
 ## Kurulum
