@@ -50,7 +50,7 @@ Bu proje, Kocaeli Üniversitesi'nde akademik personel başvuru süreçlerini dij
 
 ## Proje Raporu
 
-[Grup2_rapor.docx](https://github.com/user-attachments/files/19978678/Grup2_rapor.docx)
+[Grup2_rapor.docx](https://github.com/user-attachments/files/20065253/Grup2_rapor.docx)
 
 ## Trello Linki
 
